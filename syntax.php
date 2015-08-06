@@ -31,19 +31,28 @@ class syntax_plugin_redissue extends DokuWiki_Syntax_Plugin {
     }
  
     function connectTo($mode) {
-        $this->Lexer->addSpecialPattern('<redissue[^>]*>', $mode,'plugin_redissue');
+        $this->Lexer->addSpecialPattern('<redissue[^>]*/>', $mode,'plugin_redissue');
     }
 
     function handle($match, $state, $pos, $handler) {
         switch($state){
             case DOKU_LEXER_SPECIAL :
-                preg_match("/id *= *(['\"])#(\\d+)\\1/", $match, $id);
-                $id = $id[2];
-                $return = array(
+                $data = array(
                         'state'=>$state,
-                        'id'=>$id
+                        'id'=> 0,
+                        'text'=> 'valeur par défaut'
                     );
-                return $return;
+                // Looking for id
+                preg_match("/id *= *(['\"])#(\\d+)\\1/", $match, $id);
+                $data['id'] = $id[2];
+
+                // Looking for text link
+                preg_match("/text *= *(['\"])(.*?)\\1/", $match, $text);
+                if( count($text) != 0 ) {
+                    $data['text'] = $text[2];
+                }
+
+                return $data;
             case DOKU_LEXER_UNMATCHED :
                 return array('state'=>$state, 'text'=>$match);
             default:
@@ -58,7 +67,7 @@ class syntax_plugin_redissue extends DokuWiki_Syntax_Plugin {
         $redurl = $redurl.$data['id'];
         switch($data['state']) {
             case DOKU_LEXER_SPECIAL :
-                $renderer->doc .= '<a href=" ' . $redurl . '">test</a>';
+                $renderer->doc .= '<a href=" ' . $redurl . '">' . $data['text'] . '</a>';
             case DOKU_LEXER_UNMATCHED :
                 break;
         }
