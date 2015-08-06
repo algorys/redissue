@@ -1,11 +1,13 @@
 # Plugin Redissue
 Plugin Dokuwiki for connecting with Redmine
 
-# Install
+## Install
 Download this plugins into your ``${dokuwiki_root}/lib/plugins`` folder and restart dokuwiki.
-# Configuration
+
+## Configuration
 You have to set your redmine's url in the configuration panel, without ``/`` at the end.
-# Syntax
+
+## Syntax
 There is two way to use this plugin :
 
 * First Syntax :
