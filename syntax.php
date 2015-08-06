@@ -10,9 +10,8 @@ if (!defined('DOKU_INC')) die();
 class syntax_plugin_redissue extends DokuWiki_Syntax_Plugin {
 
     // Get url of redmine
-    function geturl() {
-	$redurl = $this->getConf('redmine.url');
-	return $redurl.'/issues/';
+    function _getIssueUrl($id) {
+	    return $this->getConf('redmine.url').'/issues/'.$id;
     }
 
     public function getType() {
@@ -75,20 +74,27 @@ class syntax_plugin_redissue extends DokuWiki_Syntax_Plugin {
         }
     }
 
+    function _render_link($renderer, $data) {
+        $renderer->doc .= '<a href="' . $this->_getIssueUrl($data['id']) . '">' .sprintf($data['text'], $data['id']) . '</a>';
+    }
+
     function render($mode, $renderer, $data) {	
         if($mode != 'xhtml') return false;
 
-        $redurl = $this->geturl();
-        $redurl = $redurl.$data['id'];
+        if($data['error']) {
+            $renderer->doc .= $data['text'];
+            return true;
+        }
         switch($data['state']) {
             case DOKU_LEXER_SPECIAL :
-            case DOKU_LEXER_ENTER :
-                if($data['error']) {
-                    $renderer->doc .= $data['text'];
-                } else {
-                    $renderer->doc .= '<a href="' . $redurl . '">' .sprintf($data['text'], $data['id']) . '</a>';
-                }
+                $this->_render_link($renderer, $data);
                 break;
+            case DOKU_LEXER_ENTER :
+                $this->_render_link($renderer, $data);
+                $renderer->doc .= '<div class="redissue">';
+                break;
+            case DOKU_LEXER_EXIT:
+                $renderer->doc .= '</div>';
             case DOKU_LEXER_UNMATCHED :
                 $renderer->doc .= $renderer->_xmlEntities($data['text']);
                 break;
