@@ -75,7 +75,7 @@ class syntax_plugin_redissue extends DokuWiki_Syntax_Plugin {
     }
 
     function _render_link($renderer, $data) {
-        $renderer->doc .= '<a href="' . $this->_getIssueUrl($data['id']) . '">' .sprintf($data['text'], $data['id']) . '</a>';
+        $renderer->doc .= '<a href="' . $this->_getIssueUrl($data['id']) . '" class="redlink">' .sprintf($data['text'], $data['id']) . '</a>';
     }
 
     function render($mode, $renderer, $data) {	

@@ -23,7 +23,7 @@ class action_plugin_redissue extends DokuWiki_Action_Plugin {
         $event->data[] = array (
             'type' => 'format',
             'title' => $this->getLang('redissue.button'),
-            'icon' => '../../plugins/redissue/issue.png',
+            'icon' => '../../plugins/redissue/images/ticket.png',
             'open' => ' <redissue id="issue" text="my_text">',
             'close' => '</redissue>',
         );
