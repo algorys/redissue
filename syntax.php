@@ -40,7 +40,7 @@ class syntax_plugin_redissue extends DokuWiki_Syntax_Plugin {
                 $data = array(
                         'state'=>$state,
                         'id'=> 0,
-                        'text'=> 'valeur par défaut'
+                        'text'=>$this->getLang('redissue.text.default')
                     );
                 // Looking for id
                 preg_match("/id *= *(['\"])#(\\d+)\\1/", $match, $id);
@@ -77,7 +77,7 @@ class syntax_plugin_redissue extends DokuWiki_Syntax_Plugin {
                 if($data['error']) {
                     $renderer->doc .= $data['text'];
                 } else {
-                    $renderer->doc .= '<a href=" ' . $redurl . '">' . $data['text'] . '</a>';
+                    $renderer->doc .= '<a href=" ' . $redurl . '">' .sprintf($data['text'], $data['id']) . '</a>';
                 }
             case DOKU_LEXER_UNMATCHED :
                 break;
