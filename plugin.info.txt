@@ -1,0 +1,7 @@
+base   redissue
+author Algorys
+email  ttamalfor@gmail.com
+date   2015-08-05
+name   redissue
+desc   insert an issue of redmine
+
