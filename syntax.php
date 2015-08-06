@@ -25,6 +25,10 @@ class syntax_plugin_redissue extends DokuWiki_Syntax_Plugin {
     public function getPType() {
         return 'normal';
     }
+    // Keep syntax inside plugin
+    function getAllowedTypes() {
+        return array('container', 'baseonly', 'substition','protected','disabled','formatting','paragraphs');
+    }
 
     public function getSort() {
         return 198;
@@ -32,11 +36,15 @@ class syntax_plugin_redissue extends DokuWiki_Syntax_Plugin {
  
     function connectTo($mode) {
         $this->Lexer->addSpecialPattern('<redissue[^>]*/>', $mode,'plugin_redissue');
+        $this->Lexer->addEntryPattern('<redissue[^>]*>(?=.*</redissue>)', $mode,'plugin_redissue');
     }
-
+    function postConnect() {
+        $this->Lexer->addExitPattern('</redissue>', 'plugin_redissue');
+    }
     function handle($match, $state, $pos, $handler) {
         switch($state){
             case DOKU_LEXER_SPECIAL :
+            case DOKU_LEXER_ENTER :
                 $data = array(
                         'state'=>$state,
                         'id'=> 0,
@@ -74,12 +82,15 @@ class syntax_plugin_redissue extends DokuWiki_Syntax_Plugin {
         $redurl = $redurl.$data['id'];
         switch($data['state']) {
             case DOKU_LEXER_SPECIAL :
+            case DOKU_LEXER_ENTER :
                 if($data['error']) {
                     $renderer->doc .= $data['text'];
                 } else {
-                    $renderer->doc .= '<a href=" ' . $redurl . '">' .sprintf($data['text'], $data['id']) . '</a>';
+                    $renderer->doc .= '<a href="' . $redurl . '">' .sprintf($data['text'], $data['id']) . '</a>';
                 }
+                break;
             case DOKU_LEXER_UNMATCHED :
+                $renderer->doc .= $renderer->_xmlEntities($data['text']);
                 break;
         }
         return true;
