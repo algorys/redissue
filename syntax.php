@@ -44,8 +44,15 @@ class syntax_plugin_redissue extends DokuWiki_Syntax_Plugin {
                     );
                 // Looking for id
                 preg_match("/id *= *(['\"])#(\\d+)\\1/", $match, $id);
-                $data['id'] = $id[2];
-
+                if( count($id) != 0 ) {
+                    $data['id'] = $id[2];
+                } else {
+                    return array(
+                            'state'=>$state,
+                            'error'=>true,
+                            'text'=>'##ERROR &lt;redissue&gt;: id attribute required##'
+                        );
+                }
                 // Looking for text link
                 preg_match("/text *= *(['\"])(.*?)\\1/", $match, $text);
                 if( count($text) != 0 ) {
@@ -67,7 +74,11 @@ class syntax_plugin_redissue extends DokuWiki_Syntax_Plugin {
         $redurl = $redurl.$data['id'];
         switch($data['state']) {
             case DOKU_LEXER_SPECIAL :
-                $renderer->doc .= '<a href=" ' . $redurl . '">' . $data['text'] . '</a>';
+                if($data['error']) {
+                    $renderer->doc .= $data['text'];
+                } else {
+                    $renderer->doc .= '<a href=" ' . $redurl . '">' . $data['text'] . '</a>';
+                }
             case DOKU_LEXER_UNMATCHED :
                 break;
         }
