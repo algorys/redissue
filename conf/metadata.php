@@ -5,4 +5,4 @@
  */
 
 $meta['redmine.url'] = array('string');
-
+$meta['redmine.img'] = array('string');

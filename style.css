@@ -4,3 +4,7 @@ div.redissue {
     text-indent: 0.3em;
 }
 
+img.redissue {
+    height: 2.0em;
+    width: 2.0em;
+}

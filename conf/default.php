@@ -4,4 +4,4 @@
  */
 
 $conf['redmine.url'] = 'http://redmine.com';       //Set url of your redmine server
-
+$conf['redmine.img'] = '';

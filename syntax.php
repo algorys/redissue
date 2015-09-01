@@ -13,6 +13,11 @@ class syntax_plugin_redissue extends DokuWiki_Syntax_Plugin {
     function _getIssueUrl($id) {
 	    return $this->getConf('redmine.url').'/issues/'.$id;
     }
+    
+    function _getImgName() {
+        // If empty (False) get the second part
+        return $this->getConf('redmine.img') ?: 'lib/plugins/redissue/images/redmine.png' ;
+    }
 
     public function getType() {
         return 'container';
@@ -75,7 +80,7 @@ class syntax_plugin_redissue extends DokuWiki_Syntax_Plugin {
     }
 
     function _render_link($renderer, $data) {
-        $renderer->doc .= '<a href="' . $this->_getIssueUrl($data['id']) . '" class="redlink">' .sprintf($data['text'], $data['id']) . '</a>';
+        $renderer->doc .= '<img src="' . $this->_getImgName($data['img']) . '" class="redissue"/> <a href="' . $this->_getIssueUrl($data['id']) . '" class="redissue">' .sprintf($data['text'], $data['id']) . '</a>';
     }
 
     function render($mode, $renderer, $data) {	
