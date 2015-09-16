@@ -6,6 +6,9 @@
  */
 
 if (!defined('DOKU_INC')) die();
+//require 'inc/common.php';
+require 'vendor/php-redmine-api/lib/autoload.php';
+
 
 class syntax_plugin_redissue extends DokuWiki_Syntax_Plugin {
 
@@ -79,8 +82,19 @@ class syntax_plugin_redissue extends DokuWiki_Syntax_Plugin {
         }
     }
 
-    function _render_link($renderer, $data) {
+    function _render_default_link($renderer, $data) {
         $renderer->doc .= '<img src="' . $this->_getImgName($data['img']) . '" class="redissue"/> <a href="' . $this->_getIssueUrl($data['id']) . '" class="redissue">' .sprintf($data['text'], $data['id']) . '</a>';
+    }
+
+    function _render_link($renderer, $data) {
+        $apiKey = ($this->getConf('redmine.API'));
+        if(empty($apiKey)){
+            _render_default_link($renderer, $data);
+        } else {
+            $client = new Redmine\Client('http://redmine.alpi-net.com', $apiKey);
+            $issues = $client->api('issue')->show($data['id']);
+            $renderer->doc .= print_r($issues);
+        }
     }
 
     function render($mode, $renderer, $data) {	
@@ -92,6 +106,9 @@ class syntax_plugin_redissue extends DokuWiki_Syntax_Plugin {
         }
         switch($data['state']) {
             case DOKU_LEXER_SPECIAL :
+                // Test Get UserId
+                //$INFO = pageinfo();
+                //$renderer->doc .= print_r($INFO['userinfo']['uid'], true);
                 $this->_render_link($renderer, $data);
                 break;
             case DOKU_LEXER_ENTER :
