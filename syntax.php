@@ -6,7 +6,6 @@
  */
 
 if (!defined('DOKU_INC')) die();
-//require 'inc/common.php';
 require 'vendor/php-redmine-api/lib/autoload.php';
 
 
@@ -15,12 +14,12 @@ class syntax_plugin_redissue extends DokuWiki_Syntax_Plugin {
 
     // Get url of redmine
     function _getIssueUrl($id) {
-	    return $this->getConf('redmine.url').'/issues/'.$id;
+	    return $this->getConf('redissue.url').'/issues/'.$id;
     }
     
     function _getImgName() {
         // If empty (False) get the second part
-        return $this->getConf('redmine.img') ?: 'lib/plugins/redissue/images/redmine.png' ;
+        return $this->getConf('redissue.img') ?: 'lib/plugins/redissue/images/redmine.png' ;
     }
 
     public function getType() {
@@ -49,6 +48,7 @@ class syntax_plugin_redissue extends DokuWiki_Syntax_Plugin {
     function postConnect() {
         $this->Lexer->addExitPattern('</redissue>', 'plugin_redissue');
     }
+    // Do the regexp
     function handle($match, $state, $pos, $handler) {
         switch($state){
             case DOKU_LEXER_SPECIAL :
@@ -90,17 +90,17 @@ class syntax_plugin_redissue extends DokuWiki_Syntax_Plugin {
     function _render_default_link($renderer, $data) {
         $this->_render_custom_link($renderer, $data, sprintf($data['text'], $data['id']));
     }
-
+    
+    // Main render_link
     function _render_link($renderer, $data) {
-        $apiKey = ($this->getConf('redmine.API'));
+        $apiKey = ($this->getConf('redissue.API'));
         if(empty($apiKey)){
             $this->_render_default_link($renderer, $data);
         } else {
-            $url = $this->getConf('redmine.url');
+            $url = $this->getConf('redissue.url');
             $client = new Redmine\Client($url, $apiKey);
-            // Get Id user of the Wiki
-            $view = $this->getConf('redmine.view');
-            //$renderer->doc .= print_r($view);
+            // Get Id user of the Wiki if Impersonate
+            $view = $this->getConf('redissue.view');
             if ($view == self::RI_IMPERSONATE) {
                 $INFO = pageinfo();
                 $redUser = $INFO['userinfo']['uid'];
@@ -131,7 +131,7 @@ class syntax_plugin_redissue extends DokuWiki_Syntax_Plugin {
             }
         }
     }
-
+    // Dokuwiki Renderer
     function render($mode, $renderer, $data) {	
         if($mode != 'xhtml') return false;
 
@@ -141,9 +141,6 @@ class syntax_plugin_redissue extends DokuWiki_Syntax_Plugin {
         }
         switch($data['state']) {
             case DOKU_LEXER_SPECIAL :
-                // Test Get UserId
-                //$INFO = pageinfo();
-                //$renderer->doc .= print_r($INFO['userinfo']['uid'], true);
                 $this->_render_link($renderer, $data);
                 break;
             case DOKU_LEXER_ENTER :
