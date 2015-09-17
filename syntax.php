@@ -122,6 +122,7 @@ class syntax_plugin_redissue extends DokuWiki_Syntax_Plugin {
                 }
                 // If isClosed not empty, change css
                 $cssClass = $isClosed ? 'redissue-status-closed' : 'redissue-status-open';
+                // Get other issue info
                 $subject = $issue['issue']['subject'];
                 $status = $issue['issue']['status']['name'];
                 $this->_render_custom_link($renderer, $data, "[#" . $data['id'] . "][" . $status . "] " . $subject, $cssClass);

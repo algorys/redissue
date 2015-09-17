@@ -2,9 +2,20 @@ div.redissue {
     background-color: #fbfaf9;
     border-radius: 0.3em;
     text-indent: 0.3em;
+    margin-left: 30px;
+    margin-right: -30px;
 }
 
 img.redissue {
     height: 2.0em;
     width: 2.0em;
+}
+
+a.redissue-status-closed {
+    text-decoration: line-through;
+    color: #989898;
+}
+
+a.redissue-status-open {
+    color: #009933;
 }
