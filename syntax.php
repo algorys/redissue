@@ -11,6 +11,7 @@ require 'vendor/php-redmine-api/lib/autoload.php';
 
 
 class syntax_plugin_redissue extends DokuWiki_Syntax_Plugin {
+    const RI_IMPERSONATE = 4;
 
     // Get url of redmine
     function _getIssueUrl($id) {
@@ -82,18 +83,51 @@ class syntax_plugin_redissue extends DokuWiki_Syntax_Plugin {
         }
     }
 
+    function _render_custom_link($renderer, $data, $title, $cssClass) {
+        $renderer->doc .= '<img src="' . $this->_getImgName($data['img']) . '" class="redissue"/> <a href="' . $this->_getIssueUrl($data['id']) . '" class="redissue '.$cssClass.'">' . $title . '</a>';
+    }
+
     function _render_default_link($renderer, $data) {
-        $renderer->doc .= '<img src="' . $this->_getImgName($data['img']) . '" class="redissue"/> <a href="' . $this->_getIssueUrl($data['id']) . '" class="redissue">' .sprintf($data['text'], $data['id']) . '</a>';
+        $this->_render_custom_link($renderer, $data, sprintf($data['text'], $data['id']));
     }
 
     function _render_link($renderer, $data) {
         $apiKey = ($this->getConf('redmine.API'));
         if(empty($apiKey)){
-            _render_default_link($renderer, $data);
+            $this->_render_default_link($renderer, $data);
         } else {
-            $client = new Redmine\Client('http://redmine.alpi-net.com', $apiKey);
-            $issues = $client->api('issue')->show($data['id']);
-            $renderer->doc .= print_r($issues);
+            $url = $this->getConf('redmine.url');
+            $client = new Redmine\Client($url, $apiKey);
+            // Get Id user of the Wiki
+            $view = $this->getConf('redmine.view');
+            //$renderer->doc .= print_r($view);
+            if ($view == self::RI_IMPERSONATE) {
+                $INFO = pageinfo();
+                $redUser = $INFO['userinfo']['uid'];
+                // Attempt to collect information with this user
+                $client->setImpersonateUser($redUser);
+            }
+            $issue = $client->api('issue')->show($data['id']);
+            if($issue) {
+                // Get the Id Status
+                $myStatusId = $issue['issue']['status']['id'];
+                $statuses = $client->api('issue_status')->all();
+                // Browse existing statuses
+                for($i = 0; $i < count($statuses['issue_statuses']); $i++) {
+                    $foundStatus = $statuses['issue_statuses'][$i];
+                    if($foundStatus['id'] == $myStatusId) {
+                        // Get is_closed value
+                        $isClosed = $foundStatus['is_closed'];
+                    }
+                }
+                // If isClosed not empty, change css
+                $cssClass = $isClosed ? 'redissue-status-closed' : 'redissue-status-open';
+                $subject = $issue['issue']['subject'];
+                $status = $issue['issue']['status']['name'];
+                $this->_render_custom_link($renderer, $data, "[#" . $data['id'] . "][" . $status . "] " . $subject, $cssClass);
+            } else {
+                $this->_render_default_link($renderer, $data);
+            }
         }
     }
 
