@@ -5,4 +5,4 @@ $lang['redissue.img']      = "Indiquez l'url de votre image. Exemple : http://ww
 $lang['redissue.API']      = "Entrez la clé de l'API de Redmine";
 $lang['redissue.view']     = "Choisissez la vue que vous souhaitez afficher :";
 $lang['redissue.view_o_4'] = "Impersonate";
-$lang['redissuee.view_o_2'] = "UserView";
+$lang['redissue.view_o_2'] = "UserView";
