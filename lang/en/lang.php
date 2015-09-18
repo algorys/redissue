@@ -5,5 +5,5 @@
 $lang['encoding']   = 'utf-8';
 $lang['direction']  = 'ltr';
 
-$lang['redissue.button'] = 'Issue\'s Name';
+$lang['redissue.button'] = 'Add a description here';
 $lang['redissue.text.default'] = 'Issue #%s';
