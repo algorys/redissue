@@ -15,10 +15,10 @@ Download this plugin into your ``${dokuwiki_root}/lib/plugins`` folder and resta
 ## Configuration
 You can configure the plugin in the Config Manager of DokuWiki :
 
-* redmine.url : Put your Redmine's url server, without a slash ending. Example : ``http://myredmine.com``
-* redmine.img : Maybe you have a custom icon for your Redmine installation. You can put image'url here. Example : ``http://www.example.com/image.png``
-* redmine.API : Set your Redmine API's key, preference Administrator key.
-* redmine.view : Choose the view you want to display. This will depend on the wiki user's access rights in Redmine.
+* redissue.url : Put your Redmine's url server, without a slash ending. Example : ``http://myredmine.com``
+* redissue.img : Maybe you have a custom icon for your Redmine installation. You can put image'url here. Example : ``http://www.example.com/image.png``
+* redissue.API : Set your Redmine API's key, preference Administrator key.
+* redissue.view : Choose the view you want to display. This will depend on the wiki user's access rights in Redmine.
   * Impersonate : select this if your wiki's users have the same UID as Redmine's users. e.g. : LDAP authentication. Redissue then will manage rights based on private or public projects.
   * Userview : doesn't manage access rights and display issue even if it's in private project.
 
