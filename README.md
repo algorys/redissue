@@ -2,13 +2,20 @@
 Plugin Dokuwiki for connecting with Redmine :
 
 ## Requirements
-Redissue needs a php API to work. You have to download [Php-Redmine-API](https://github.com/kbsali/php-redmine-api) inside the ROOT of your Dokuwiki's install.
+Redissue needs [Php-Redmine-API](https://github.com/kbsali/php-redmine-api) to work. Download it inside the ROOT of your Dokuwiki's install.
 ```bash
 $ mkdir vendor
 $ cd vendor
 $ git clone https://github.com/kbsali/php-redmine-api.git
+$ cd php-redmine-api
 $ git checkout v1.5.5
 ```
+
+Don't forget to install the requirements of PhP-Redmine-API :
+```bash
+$ sudo apt-get install php5-curl php5-common
+```
+
 ## Install
 Download this plugin into your ``${dokuwiki_root}/lib/plugins`` folder and restart dokuwiki.
 
