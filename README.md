@@ -39,4 +39,8 @@ There is two way to use this plugin :
 
 ``<redissue id='#number_issue' text="the link's text"> Your description...</redissue>``
 
+## Preview
+Here is a preview of redissue :
+![](http://s1.postimg.org/v1gniip1r/redissue.png)
+
 For further information, see also [Redissue on dokuwiki.org](https://www.dokuwiki.org/plugin:redissue)
