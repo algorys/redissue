@@ -125,7 +125,12 @@ class syntax_plugin_redissue extends DokuWiki_Syntax_Plugin {
                 // Get other issue info
                 $subject = $issue['issue']['subject'];
                 $status = $issue['issue']['status']['name'];
-                $this->_render_custom_link($renderer, $data, "[#" . $data['id'] . "][" . $status . "] " . $subject, $cssClass);
+                $this->_render_custom_link($renderer, $data, "[#" . $data['id'] . "]" . $subject, $cssClass);
+                if(!$isClosed){
+                    $renderer->doc .= ' <span class="status">' . $status . '</span> <img src="lib/plugins/redissue/images/open.png"/>';
+                } else {
+                    $renderer->doc .= ' <span class="status">' . $status . '</span> <img src="lib/plugins/redissue/images/closed.png" />';
+                }
             } else {
                 $this->_render_default_link($renderer, $data);
             }
