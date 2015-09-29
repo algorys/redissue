@@ -10,13 +10,25 @@ div.redissue {
 img.redissue {
     height: 2.0em;
     width: 2.0em;
+    /*margin-bottom: -10px;*/
 }
 
 a.redissue-status-closed {
-    text-decoration: line-through;
+    text-decoration: line-through !important;
     color: #989898;
+    background-color: #f6f6f6;
+
 }
 
 a.redissue-status-open {
     color: #009933;
+    background-color: #f6f6f6;
+}
+
+span.status {
+    background-color: #3498db;
+    border-radius: .3em;
+    text-indent: .3em;
+    color: white;
+    padding: 1px;
 }
