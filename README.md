@@ -1,8 +1,13 @@
 # Plugin Redissue
-Plugin Dokuwiki for connecting with Redmine :
+Plugin Dokuwiki display issues of Redmine and keep the rights of Redmine too. Redissue have the following features :
+* Name of issue
+* Number of issue
+* Make a link to the choosen issue in Redmine.
+* Display more or less information depending on your rights.
 
 ## Requirements
-Redissue needs [Php-Redmine-API](https://github.com/kbsali/php-redmine-api) to work. Download it inside the ROOT of your redissue's folder or inside ``/usr/share/php`` folder.
+Redissue needs [Php-Redmine-API](https://github.com/kbsali/php-redmine-api) to work. Download it inside the ROOT of your redissue's folder or inside ``/usr/share/php`` folder. The second way is better if you use [Redproject](https://www.dokuwiki.org/plugin:redissue) too, as you've just to install API once time.
+
 ```bash
 $ mkdir vendor
 $ cd vendor
