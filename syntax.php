@@ -144,6 +144,7 @@ class syntax_plugin_redissue extends DokuWiki_Syntax_Plugin {
             $renderer->doc .= $data['text'];
             return true;
         }
+        $renderer->info['cache'] = false;
         switch($data['state']) {
             case DOKU_LEXER_SPECIAL :
                 $this->_render_link($renderer, $data);
