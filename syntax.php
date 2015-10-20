@@ -84,7 +84,12 @@ class syntax_plugin_redissue extends DokuWiki_Syntax_Plugin {
     }
 
     function _render_custom_link($renderer, $data, $title, $cssClass) {
-        $renderer->doc .= '<img src="' . $this->_getImgName($data['img']) . '" class="redissue"/> <a href="' . $this->_getIssueUrl($data['id']) . '" class="redissue '.$cssClass.'">' . $title . '</a>';
+        $renderer->doc .= '<a title="Voir dans Redmine" href="' . $this->_getIssueUrl($data['id']) . '"><img src="' . $this->_getImgName($data['img']) . '" class="redissue"/></a>';
+        $renderer->doc .= '<a class="btn btn-primary" role="button" data-toggle="collapse" href="#collapseExample" aria-expanded="false" aria-controls="collapseExample">';
+        $renderer->doc .= $title;
+        $renderer->doc .= '</a>';
+        $renderer->doc .= '<div class="collapse" id="collapseExample">';
+        #$renderer->doc .= '<img src="' . $this->_getImgName($data['img']) . '" class="redissue"/> <a href="' . $this->_getIssueUrl($data['id']) . '" class="redissue '.$cssClass.'">' . $title . '</a>';
     }
 
     function _render_default_link($renderer, $data) {
@@ -108,6 +113,56 @@ class syntax_plugin_redissue extends DokuWiki_Syntax_Plugin {
                 $client->setImpersonateUser($redUser);
             }
             $issue = $client->api('issue')->show($data['id']);
+            #print_r($issue);
+            $project = $issue['issue']['project'];
+            echo "Projet : ";
+            print_r($project);
+            $tracker = $issue['issue']['tracker'];
+            echo "Tracker : ";
+            print_r($tracker);
+            $status = $issue['issue']['status'];
+            echo "Status : ";
+            print_r($status);
+            $priority = $issue['issue']['priority'];
+            echo "Priority : ";
+            print_r($priority);
+            $author = $issue['issue']['author'];
+            echo "Author : ";
+            print_r($author);
+            $assigned = $issue['issue']['assigned_to'];
+            echo "Assigned : ";
+            print_r($assigned);
+            $subject = $issue['issue']['subject'];
+            echo "Subject : ";
+            print_r($subject);
+            $description = $issue['issue']['description'];
+            echo "Descirption : ";
+            print_r($description);
+            $done_ratio = $issue['issue']['done_ratio'];
+            echo "% Done : ";
+            print_r($done_ratio);
+            echo '<br>';
+            $all_prio = $client->api('issue_priority')->all();
+            for ($p = 0; $p < count($all_prio['issue_priorities']); $p++) {
+                print_r( $all_prio['issue_priorities'][$p]);
+                if ($all_prio['issue_priorities'][$p] == $all_prio['issue_priorities'][$p]['is_default']) { 
+                    $normal_prio = $all_prio['issue_priorities'][$p];
+                }
+                echo '<br>';
+            }
+            echo '<br>';
+            print_r($normal_prio);
+            $color_prio = array();
+            $rgb = 200;
+            for ($p = 0; $p < count($all_prio['issue_priorities']); $p++) {
+                array_push($color_prio, $all_prio['issue_priorities'][$p]);
+                $rgb += 4; 
+                array_push($color_prio[$p], $rgb);
+            }
+            echo '<br>';
+            print_r($color_prio);
+echo '<br>';
+            print_r($color_prio['3']);
             if($issue) {
                 // Get the Id Status
                 $myStatusId = $issue['issue']['status']['id'];
@@ -125,11 +180,11 @@ class syntax_plugin_redissue extends DokuWiki_Syntax_Plugin {
                 // Get other issue info
                 $subject = $issue['issue']['subject'];
                 $status = $issue['issue']['status']['name'];
-                $this->_render_custom_link($renderer, $data, "[#" . $data['id'] . "]" . $subject, $cssClass);
+                $this->_render_custom_link($renderer, $data, "[#" . $data['id'] . "] " . $subject, $cssClass);
                 if(!$isClosed){
-                    $renderer->doc .= ' <span class="status">' . $status . '</span> <img src="lib/plugins/redissue/images/open.png"/>';
+                    $renderer->doc .= ' <span class="label label-danger">' . $status . '</span> <img src="lib/plugins/redissue/images/open.png"/>';
                 } else {
-                    $renderer->doc .= ' <span class="status">' . $status . '</span> <img src="lib/plugins/redissue/images/closed.png" />';
+                    $renderer->doc .= ' <span class="label label-success">' . $status . '</span> <img src="lib/plugins/redissue/images/closed.png" />';
                 }
             } else {
                 $this->_render_default_link($renderer, $data);
@@ -151,10 +206,10 @@ class syntax_plugin_redissue extends DokuWiki_Syntax_Plugin {
                 break;
             case DOKU_LEXER_ENTER :
                 $this->_render_link($renderer, $data);
-                $renderer->doc .= '<div class="redissue">';
+                $renderer->doc .= '<div class="well">';
                 break;
             case DOKU_LEXER_EXIT:
-                $renderer->doc .= '</div>';
+                $renderer->doc .= '</div></div>';
             case DOKU_LEXER_UNMATCHED :
                 $renderer->doc .= $renderer->_xmlEntities($data['text']);
                 break;
