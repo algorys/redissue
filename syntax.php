@@ -95,7 +95,49 @@ class syntax_plugin_redissue extends DokuWiki_Syntax_Plugin {
     function _render_default_link($renderer, $data) {
         $this->_render_custom_link($renderer, $data, sprintf($data['text'], $data['id']));
     }
+
+    function _color_prio($client, $id_priority) {
+        $all_prio = $client->api('issue_priority')->all();
+        $normal_prio = 0;
+        // Get the normal index and current index
+        for ($i = 0; $i < count($all_prio['issue_priorities']); $i++) {
+            $current_prio = $all_prio['issue_priorities'][$i];
+            if ($current_prio['is_default'] == 1) {
+                $normal_prio = $i;
+            }                
+            if($current_prio['id'] == $id_priority){
+                $index_prio = $i;
+            }
+        }
+        $min_prio = 0;
+        $low_prio = $normal_prio - 1;
+        $high_prio = $normal_prio + 1;
+        $critical_prio = count($all_prio['issue_priorities']) - 1;
+        if($index_prio == $normal_prio) {
+           $color_prio = 'success'; 
+        }
+        elseif($index_prio == $min_prio) {
+            $color_prio = 'info';
+        }
+        elseif($index_prio < $normal_prio && $index_prio > $min_prio) {
+            $color_prio = 'primary';
+        }
+        elseif($index_prio > $normal_prio && $index_prio < $critical_prio) {
+            $color_prio = 'warning';
+        }
+        else {
+            $color_prio = 'danger';
+        }
+        return $color_prio;
+    }
     
+    function _project_identifier($client, $project_name) {
+            $project_id = $client->api('project')->getIdByName($project_name);
+            $project = $client->api('project')->show($project_id);
+            $project_identifier = $project['project']['identifier'];
+            return $project_identifier;
+    }
+
     // Main render_link
     function _render_link($renderer, $data) {
         $apiKey = ($this->getConf('redissue.API'));
@@ -114,57 +156,19 @@ class syntax_plugin_redissue extends DokuWiki_Syntax_Plugin {
             }
             $issue = $client->api('issue')->show($data['id']);
             #print_r($issue);
-            $project = $issue['issue']['project'];
-            echo "Projet : ";
-            print_r($project);
-            $tracker = $issue['issue']['tracker'];
-            echo "Tracker : ";
-            print_r($tracker);
-            $status = $issue['issue']['status'];
-            echo "Status : ";
-            print_r($status);
-            $priority = $issue['issue']['priority'];
-            echo "Priority : ";
-            print_r($priority);
-            $author = $issue['issue']['author'];
-            echo "Author : ";
-            print_r($author);
-            $assigned = $issue['issue']['assigned_to'];
-            echo "Assigned : ";
-            print_r($assigned);
-            $subject = $issue['issue']['subject'];
-            echo "Subject : ";
-            print_r($subject);
-            $description = $issue['issue']['description'];
-            echo "Descirption : ";
-            print_r($description);
-            $done_ratio = $issue['issue']['done_ratio'];
-            echo "% Done : ";
-            print_r($done_ratio);
-            echo '<br>';
-            $all_prio = $client->api('issue_priority')->all();
-            for ($p = 0; $p < count($all_prio['issue_priorities']); $p++) {
-                print_r( $all_prio['issue_priorities'][$p]);
-                if ($all_prio['issue_priorities'][$p] == $all_prio['issue_priorities'][$p]['is_default']) { 
-                    $normal_prio = $all_prio['issue_priorities'][$p];
-                }
-                echo '<br>';
-            }
-            echo '<br>';
-            print_r($normal_prio);
-            $color_prio = array();
-            $rgb = 200;
-            for ($p = 0; $p < count($all_prio['issue_priorities']); $p++) {
-                array_push($color_prio, $all_prio['issue_priorities'][$p]);
-                $rgb += 4; 
-                array_push($color_prio[$p], $rgb);
-            }
-            echo '<br>';
-            print_r($color_prio);
-echo '<br>';
-            print_r($color_prio['3']);
             if($issue) {
-                // Get the Id Status
+                // ALL_INFO --- Get Info from the Issue
+                $project = $issue['issue']['project'];
+                $project_identifier = $this->_project_identifier($client, $project['name']);
+                $tracker = $issue['issue']['tracker'];
+                $status = $issue['issue']['status']['name'];
+                $author = $issue['issue']['author'];
+                $assigned = $issue['issue']['assigned_to'];
+                $subject = $issue['issue']['subject'];
+                $description = $issue['issue']['description'];
+                $done_ratio = $issue['issue']['done_ratio'];
+                
+                // RENDERER_MAIN_LINK ---- Get the Id Status
                 $myStatusId = $issue['issue']['status']['id'];
                 $statuses = $client->api('issue_status')->all();
                 // Browse existing statuses
@@ -177,15 +181,33 @@ echo '<br>';
                 }
                 // If isClosed not empty, change css
                 $cssClass = $isClosed ? 'redissue-status-closed' : 'redissue-status-open';
-                // Get other issue info
-                $subject = $issue['issue']['subject'];
-                $status = $issue['issue']['status']['name'];
                 $this->_render_custom_link($renderer, $data, "[#" . $data['id'] . "] " . $subject, $cssClass);
+                
+                // PRIORITIES --- Get priority and define color
+                $priority = $issue['issue']['priority'];
+                $id_priority = $priority['id'];
+                $color_prio = $this->_color_prio($client, $id_priority);
                 if(!$isClosed){
-                    $renderer->doc .= ' <span class="label label-danger">' . $status . '</span> <img src="lib/plugins/redissue/images/open.png"/>';
+                    $renderer->doc .= ' <span class="label label-success">' . $status . '</span>';
                 } else {
-                    $renderer->doc .= ' <span class="label label-success">' . $status . '</span> <img src="lib/plugins/redissue/images/closed.png" />';
+                    $renderer->doc .= ' <span class="label label-default">' . $status . '</span>';
                 }
+                
+                // GENERAL_RENDERER ---
+                $renderer->doc .= ' <span class="label label-'.$color_prio.'">'.$priority['name'].'</span>';
+                $renderer->doc .= ' <span class="label label-primary">'. $tracker['name'].'</span>';
+                $renderer->doc .= '<div class="well">';
+                $renderer->doc .= '<div class="issue-info"><dl class="dl-horizontal">';
+                $renderer->doc .= '<dt><icon class="glyphicon glyphicon-info-sign">&nbsp;</icon>Projet :</dt>';
+                $renderer->doc .= '<dd><a href="'.$url.'/projects/'.$project_identifier.'">'.$project['name'].'</a></dd>';
+                $renderer->doc .= '<dt>Auteur :</dt>';
+                $renderer->doc .= '<dd>'.$author['name'].' </dd>';
+                $renderer->doc .= '<dt>Assigné à :</dt>';
+                $renderer->doc .= '<dd>'.$assigned['name'].' </dd>';
+                $renderer->doc .= '</dl></div>'; // ./ Issue-info
+                $renderer->doc .= '<h4>Description</h4><p>'.$description.'</p>';
+                $renderer->doc .= '</div>'; // ./ first well 
+                $renderer->doc .= '<div class ="issue-doku">';
             } else {
                 $this->_render_default_link($renderer, $data);
             }
@@ -206,7 +228,7 @@ echo '<br>';
                 break;
             case DOKU_LEXER_ENTER :
                 $this->_render_link($renderer, $data);
-                $renderer->doc .= '<div class="well">';
+                #$renderer->doc .= '<div class="well">';
                 break;
             case DOKU_LEXER_EXIT:
                 $renderer->doc .= '</div></div>';

@@ -32,3 +32,16 @@ span.status {
     color: white;
     padding: 1px;
 }
+
+div.issue-info {
+    float: right;
+}
+
+div.issue-doku {
+    border: 1px solid #eee;
+    border-left-width: 5px;
+    border-radius: 3px;
+    border-left-color: #19B317; 
+    margin-left: 1em;
+    padding: 1em;
+}
