@@ -1,9 +1,10 @@
 # Plugin Redissue
 Plugin Dokuwiki display issues of Redmine and keep the rights of Redmine too. Redissue have the following features :
 * Name of issue
-* Number of issue
+* Id, tracker, priority of issue
 * Make a link to the choosen issue in Redmine.
 * Display more or less information depending on your rights.
+* Compatible with [Bootstrap](http://getbootstrap.com/) (need [Bootstrap3 Template](https://github.com/LotarProject/dokuwiki-template-bootstrap3/).
 
 ## Requirements
 Redissue needs [Php-Redmine-API](https://github.com/kbsali/php-redmine-api) to work. Download it inside the ROOT of your redissue's folder or inside ``/usr/share/php`` folder. The second way is better if you use [Redproject](https://www.dokuwiki.org/plugin:redissue) too, as you've just to install API once time.
@@ -23,6 +24,14 @@ $ sudo apt-get install php5-curl php5-common
 
 ## Install
 Download this plugin into your ``${dokuwiki_root}/lib/plugins`` folder and restart dokuwiki.
+* If you have bootstrap theme, you can checkout on bootstrap branch :
+```bash
+$ git checkout bootstrap
+```
+* If you have only dokuwiki theme or another one, try the v1.1
+```bash
+$ git checkout v1.1
+```
 
 ## Configuration
 You can configure the plugin in the Config Manager of DokuWiki :
@@ -45,7 +54,9 @@ There is two way to use this plugin :
 ``<redissue id='#number_issue' text="the link's text"> Your description...</redissue>``
 
 ## Preview
-Here is a preview of redissue :
+Here is a preview of redissue (dokuwiki theme):
 ![](http://s1.postimg.org/v1gniip1r/redissue.png)
+And (bootstrap theme) :
+![](http://s10.postimg.org/3jsjjq8sp/redissue2.png)
 
 For further information, see also [Redissue on dokuwiki.org](https://www.dokuwiki.org/plugin:redissue)
