@@ -89,7 +89,6 @@ class syntax_plugin_redissue extends DokuWiki_Syntax_Plugin {
         $renderer->doc .= $title;
         $renderer->doc .= '</a>';
         $renderer->doc .= '<div class="collapse" id="collapseExample">';
-        #$renderer->doc .= '<img src="' . $this->_getImgName($data['img']) . '" class="redissue"/> <a href="' . $this->_getIssueUrl($data['id']) . '" class="redissue '.$cssClass.'">' . $title . '</a>';
     }
 
     function _render_default_link($renderer, $data) {
@@ -149,13 +148,11 @@ class syntax_plugin_redissue extends DokuWiki_Syntax_Plugin {
             // Get Id user of the Wiki if Impersonate
             $view = $this->getConf('redissue.view');
             if ($view == self::RI_IMPERSONATE) {
-                $INFO = pageinfo();
-                $redUser = $INFO['userinfo']['uid'];
+                $redUser = $_SERVER['REMOTE_USER'];;
                 // Attempt to collect information with this user
                 $client->setImpersonateUser($redUser);
             }
             $issue = $client->api('issue')->show($data['id']);
-            #print_r($issue);
             if($issue) {
                 // ALL_INFO --- Get Info from the Issue
                 $project = $issue['issue']['project'];
