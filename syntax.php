@@ -164,7 +164,7 @@ class syntax_plugin_redissue extends DokuWiki_Syntax_Plugin {
                 $subject = $issue['issue']['subject'];
                 $description = $issue['issue']['description'];
                 $done_ratio = $issue['issue']['done_ratio'];
-                
+                print_r($done_ratio);
                 // RENDERER_MAIN_LINK ---- Get the Id Status
                 $myStatusId = $issue['issue']['status']['id'];
                 $statuses = $client->api('issue_status')->all();
@@ -203,7 +203,11 @@ class syntax_plugin_redissue extends DokuWiki_Syntax_Plugin {
                 $renderer->doc .= '<dd>'.$assigned['name'].' </dd>';
                 $renderer->doc .= '</dl></div>'; // ./ Issue-info
                 $renderer->doc .= '<h4>Description</h4><p>'.$description.'</p>';
-                $renderer->doc .= '</div>'; // ./ first well 
+                $renderer->doc .= '<div class="progress">';
+                $renderer->doc .= '<span class="progress-bar" role="progressbar" aria-valuenow="70" aria-valuemin="0" aria-valuemax="100" style="width:'.$done_ratio.'%">';
+                $renderer->doc .= '<span class="doku">'.$done_ratio.'% Complete</span>';
+                $renderer->doc .= '</span></div>'; // ./progress
+                $renderer->doc .= '</div>'; // ./ well 
                 $renderer->doc .= '<div class ="issue-doku">';
             } else {
                 $this->_render_default_link($renderer, $data);
@@ -225,7 +229,6 @@ class syntax_plugin_redissue extends DokuWiki_Syntax_Plugin {
                 break;
             case DOKU_LEXER_ENTER :
                 $this->_render_link($renderer, $data);
-                #$renderer->doc .= '<div class="well">';
                 break;
             case DOKU_LEXER_EXIT:
                 $renderer->doc .= '</div></div>';
