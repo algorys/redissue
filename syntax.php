@@ -83,12 +83,12 @@ class syntax_plugin_redissue extends DokuWiki_Syntax_Plugin {
         }
     }
 
-    function _render_custom_link($renderer, $data, $title, $cssClass) {
+    function _render_custom_link($renderer, $data, $title) {
         $renderer->doc .= '<a title="Voir dans Redmine" href="' . $this->_getIssueUrl($data['id']) . '"><img src="' . $this->_getImgName($data['img']) . '" class="redissue"/></a>';
-        $renderer->doc .= '<a class="btn btn-primary" role="button" data-toggle="collapse" href="#collapseExample" aria-expanded="false" aria-controls="collapseExample">';
+        $renderer->doc .= '<a class="btn btn-primary" role="button" data-toggle="collapse" href="#collapse-'.$data['id'].'" aria-expanded="false" aria-controls="collapse-'.$data['id'].'">';
         $renderer->doc .= $title;
         $renderer->doc .= '</a>';
-        $renderer->doc .= '<div class="collapse" id="collapseExample">';
+        $renderer->doc .= '<div class="collapse" id="collapse-'.$data['id'].'">';
     }
 
     function _render_default_link($renderer, $data) {
@@ -177,8 +177,8 @@ class syntax_plugin_redissue extends DokuWiki_Syntax_Plugin {
                     }
                 }
                 // If isClosed not empty, change css
-                $cssClass = $isClosed ? 'redissue-status-closed' : 'redissue-status-open';
-                $this->_render_custom_link($renderer, $data, "[#" . $data['id'] . "] " . $subject, $cssClass);
+                #$cssClass = $isClosed ? 'redissue-status-closed' : 'redissue-status-open';
+                $this->_render_custom_link($renderer, $data, "[#" . $data['id'] . "] " . $subject);
                 
                 // PRIORITIES --- Get priority and define color
                 $priority = $issue['issue']['priority'];
