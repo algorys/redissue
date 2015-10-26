@@ -83,16 +83,18 @@ class syntax_plugin_redissue extends DokuWiki_Syntax_Plugin {
         }
     }
 
-    function _render_custom_link($renderer, $data, $title) {
+    function _render_custom_link($renderer, $data, $title, $bootstrap) {
         $renderer->doc .= '<a title="Voir dans Redmine" href="' . $this->_getIssueUrl($data['id']) . '"><img src="' . $this->_getImgName($data['img']) . '" class="redissue"/></a>';
         $renderer->doc .= '<a class="btn btn-primary" role="button" data-toggle="collapse" href="#collapse-'.$data['id'].'" aria-expanded="false" aria-controls="collapse-'.$data['id'].'">';
         $renderer->doc .= $title;
         $renderer->doc .= '</a>';
-        $renderer->doc .= '<div class="collapse" id="collapse-'.$data['id'].'">';
+        if($bootstrap){
+            $renderer->doc .= '<div class="collapse" id="collapse-'.$data['id'].'">';
+        }
     }
 
     function _render_default_link($renderer, $data) {
-        $this->_render_custom_link($renderer, $data, sprintf($data['text'], $data['id']));
+        $this->_render_custom_link($renderer, $data, sprintf($data['text'], $data['id']), $bootstrap);
     }
 
     function _color_prio($client, $id_priority) {
@@ -139,6 +141,10 @@ class syntax_plugin_redissue extends DokuWiki_Syntax_Plugin {
 
     // Main render_link
     function _render_link($renderer, $data) {
+        $bootstrap = False;
+        if ($this->getConf('redissue.theme') == 8){
+            $bootstrap = True;
+        }
         $apiKey = ($this->getConf('redissue.API'));
         if(empty($apiKey)){
             $this->_render_default_link($renderer, $data);
@@ -164,7 +170,6 @@ class syntax_plugin_redissue extends DokuWiki_Syntax_Plugin {
                 $subject = $issue['issue']['subject'];
                 $description = $issue['issue']['description'];
                 $done_ratio = $issue['issue']['done_ratio'];
-                print_r($done_ratio);
                 // RENDERER_MAIN_LINK ---- Get the Id Status
                 $myStatusId = $issue['issue']['status']['id'];
                 $statuses = $client->api('issue_status')->all();
@@ -177,38 +182,52 @@ class syntax_plugin_redissue extends DokuWiki_Syntax_Plugin {
                     }
                 }
                 // If isClosed not empty, change css
-                #$cssClass = $isClosed ? 'redissue-status-closed' : 'redissue-status-open';
-                $this->_render_custom_link($renderer, $data, "[#" . $data['id'] . "] " . $subject);
+                $this->_render_custom_link($renderer, $data, "[#" . $data['id'] . "] " . $subject, $bootstrap);
                 
                 // PRIORITIES --- Get priority and define color
                 $priority = $issue['issue']['priority'];
                 $id_priority = $priority['id'];
                 $color_prio = $this->_color_prio($client, $id_priority);
                 if(!$isClosed){
-                    $renderer->doc .= ' <span class="label label-success">' . $status . '</span>';
+                    if($bootstrap){
+                        $renderer->doc .= ' <span class="label label-success">' . $status . '</span>';
+                    }else{
+                        $renderer->doc .= ' <span class="badge-prio open">' . $status . '</span>';
+                    }
                 } else {
-                    $renderer->doc .= ' <span class="label label-default">' . $status . '</span>';
+                    if($bootstrap){
+                        $renderer->doc .= ' <span class="label label-default">' . $status . '</span>';
+                    }else{
+                        $renderer->doc .= ' <span class="badge-prio closed">' . $status . '</span>';
+                    }
                 }
                 
                 // GENERAL_RENDERER ---
-                $renderer->doc .= ' <span class="label label-'.$color_prio.'">'.$priority['name'].'</span>';
-                $renderer->doc .= ' <span class="label label-primary">'. $tracker['name'].'</span>';
-                $renderer->doc .= '<div class="well">';
-                $renderer->doc .= '<div class="issue-info"><dl class="dl-horizontal">';
-                $renderer->doc .= '<dt><icon class="glyphicon glyphicon-info-sign">&nbsp;</icon>Projet :</dt>';
-                $renderer->doc .= '<dd><a href="'.$url.'/projects/'.$project_identifier.'">'.$project['name'].'</a></dd>';
-                $renderer->doc .= '<dt>Auteur :</dt>';
-                $renderer->doc .= '<dd>'.$author['name'].' </dd>';
-                $renderer->doc .= '<dt>Assigné à :</dt>';
-                $renderer->doc .= '<dd>'.$assigned['name'].' </dd>';
-                $renderer->doc .= '</dl></div>'; // ./ Issue-info
-                $renderer->doc .= '<h4>Description</h4><p>'.$description.'</p>';
-                $renderer->doc .= '<div class="progress">';
-                $renderer->doc .= '<span class="progress-bar" role="progressbar" aria-valuenow="70" aria-valuemin="0" aria-valuemax="100" style="width:'.$done_ratio.'%">';
-                $renderer->doc .= '<span class="doku">'.$done_ratio.'% Complete</span>';
-                $renderer->doc .= '</span></div>'; // ./progress
-                $renderer->doc .= '</div>'; // ./ well 
-                $renderer->doc .= '<div class ="issue-doku">';
+                if($bootstrap) {
+                    $renderer->doc .= ' <span class="label label-'.$color_prio.'">'.$priority['name'].'</span>';
+                    $renderer->doc .= ' <span class="label label-primary">'. $tracker['name'].'</span>';
+                    $renderer->doc .= '<div class="well">';
+                    $renderer->doc .= '<div class="issue-info"><dl class="dl-horizontal">';
+                    $renderer->doc .= '<dt><icon class="glyphicon glyphicon-info-sign">&nbsp;</icon>Projet :</dt>';
+                    $renderer->doc .= '<dd><a href="'.$url.'/projects/'.$project_identifier.'">'.$project['name'].'</a></dd>';
+                    $renderer->doc .= '<dt>Auteur :</dt>';
+                    $renderer->doc .= '<dd>'.$author['name'].' </dd>';
+                    $renderer->doc .= '<dt>Assigné à :</dt>';
+                    $renderer->doc .= '<dd>'.$assigned['name'].' </dd>';
+                    $renderer->doc .= '</dl></div>'; // ./ Issue-info
+                    $renderer->doc .= '<h4>Description</h4><p>'.$description.'</p>';
+                    $renderer->doc .= '<div class="progress">';
+                    $renderer->doc .= '<span class="progress-bar" role="progressbar" aria-valuenow="70" aria-valuemin="0" aria-valuemax="100" style="width:'.$done_ratio.'%">';
+                    $renderer->doc .= '<span class="doku">'.$done_ratio.'% Complete</span>';
+                    $renderer->doc .= '</span></div>'; // ./progress
+                    $renderer->doc .= '</div>'; // ./ well 
+                    $renderer->doc .= '<div class ="issue-doku">';
+                }else{ //Not Bootstrap
+                    $renderer->doc .= '<div class="issue-doku border-'.$color_prio.'">';
+                    $renderer->doc .=  ' <span class="badge-prio color-'.$color_prio.'">'.$priority['name'].'</span>';
+                    $renderer->doc .= ' <span class="badge-prio tracker">'. $tracker['name'].'</span>';
+                    $renderer->doc .= '<div class="description">';
+                }
             } else {
                 $this->_render_default_link($renderer, $data);
             }
