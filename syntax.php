@@ -224,8 +224,19 @@ class syntax_plugin_redissue extends DokuWiki_Syntax_Plugin {
                     $renderer->doc .= '<div class ="issue-doku">';
                 }else{ //Not Bootstrap
                     $renderer->doc .= '<div class="issue-doku border-'.$color_prio.'">';
-                    $renderer->doc .=  ' <span class="badge-prio color-'.$color_prio.'">'.$priority['name'].'</span>';
+                    $renderer->doc .= ' <span class="badge-prio color-'.$color_prio.'">'.$priority['name'].'</span>';
                     $renderer->doc .= ' <span class="badge-prio tracker">'. $tracker['name'].'</span>';
+                    $renderer->doc .= '<div class="issue-info">';
+                    $renderer->doc .= '<span> Projet :</span>';
+                    $renderer->doc .= '<a href="'.$url.'/projects/'.$project_identifier.'"> '.$project['name'].'</a>';
+                    $renderer->doc .= '<span> Auteur :</span>';
+                    $renderer->doc .= '<a> '.$author['name'].' </a>';
+                    $renderer->doc .= '<span> Assigné à :</span>';
+                    $renderer->doc .= '<a> '.$assigned['name'].' </a>';
+                    $renderer->doc .= '</span></div>'; // ./ Issue-info
+                    $renderer->doc .= '<div class="issue-description">';
+                    $renderer->doc .= '<p>TEST 2</p>';
+                    $renderer->doc .= '</div>';
                     $renderer->doc .= '<div class="description">';
                 }
             } else {

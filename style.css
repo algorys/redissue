@@ -105,3 +105,8 @@ span.tracker {
     background-color: #008cba;
 }
 
+div.issue-info span{
+    font-weight: bold;
+}
+
+
