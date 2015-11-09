@@ -256,6 +256,7 @@ class syntax_plugin_redissue extends DokuWiki_Syntax_Plugin {
         switch($data['state']) {
             case DOKU_LEXER_SPECIAL :
                 $this->_render_link($renderer, $data);
+                $renderer->doc .= '</div></div>';
                 break;
             case DOKU_LEXER_ENTER :
                 $this->_render_link($renderer, $data);
