@@ -43,7 +43,7 @@ class syntax_plugin_redissue extends DokuWiki_Syntax_Plugin {
  
     function connectTo($mode) {
         $this->Lexer->addSpecialPattern('<redissue[^>]*/>', $mode,'plugin_redissue');
-        $this->Lexer->addEntryPattern('<redissue[^>]*>(?=.*</redissue>)', $mode,'plugin_redissue');
+        $this->Lexer->addEntryPattern('<redissue[^>/]*>(?=.*</redissue>)', $mode,'plugin_redissue');
     }
     function postConnect() {
         $this->Lexer->addExitPattern('</redissue>', 'plugin_redissue');
@@ -221,7 +221,9 @@ class syntax_plugin_redissue extends DokuWiki_Syntax_Plugin {
                     $renderer->doc .= '<span class="doku">'.$done_ratio.'% Complete</span>';
                     $renderer->doc .= '</span></div>'; // ./progress
                     $renderer->doc .= '</div>'; // ./ well 
-                    $renderer->doc .= '<div class ="issue-doku">';
+                    if($data['state'] != DOKU_LEXER_SPECIAL) {
+                       $renderer->doc .= '<div class ="issue-doku">';
+                    };
                 }else{ //Not Bootstrap
                     $renderer->doc .= '<div class="issue-doku border-'.$color_prio.'">';
                     $renderer->doc .= ' <span class="badge-prio color-'.$color_prio.'">'.$priority['name'].'</span>';
@@ -237,7 +239,9 @@ class syntax_plugin_redissue extends DokuWiki_Syntax_Plugin {
                     $renderer->doc .= '<div class="issue-description">';
                     $renderer->doc .= '<p>TEST 2</p>';
                     $renderer->doc .= '</div>';
-                    $renderer->doc .= '<div class="description">';
+                    if($data['state'] != DOKU_LEXER_SPECIAL) {
+                       $renderer->doc .= '<div class="description">';
+                    };
                 }
             } else {
                 $this->_render_default_link($renderer, $data);
@@ -256,7 +260,7 @@ class syntax_plugin_redissue extends DokuWiki_Syntax_Plugin {
         switch($data['state']) {
             case DOKU_LEXER_SPECIAL :
                 $this->_render_link($renderer, $data);
-                $renderer->doc .= '</div></div>';
+                $renderer->doc .= '</div>';
                 break;
             case DOKU_LEXER_ENTER :
                 $this->_render_link($renderer, $data);
