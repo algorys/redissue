@@ -7,10 +7,18 @@ div.redissue {
     margin-bottom: 10px;
 }
 
+a.btn.btn-primary.redissue {
+    line-height: 1;
+}
+
 img.redissue {
     height: 2.0em;
     width: 2.0em;
     /*margin-bottom: -10px;*/
+}
+
+img.redissue:hover {
+    background-image:url(images/eye.png);
 }
 
 a.redissue-status-closed {

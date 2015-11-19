@@ -85,7 +85,7 @@ class syntax_plugin_redissue extends DokuWiki_Syntax_Plugin {
 
     function _render_custom_link($renderer, $data, $title, $bootstrap) {
         $renderer->doc .= '<a title="Voir dans Redmine" href="' . $this->_getIssueUrl($data['id']) . '"><img src="' . $this->_getImgName($data['img']) . '" class="redissue"/></a>';
-        $renderer->doc .= '<a class="btn btn-primary" role="button" data-toggle="collapse" href="#collapse-'.$data['id'].'" aria-expanded="false" aria-controls="collapse-'.$data['id'].'">';
+        $renderer->doc .= '<a class="btn btn-primary redissue" role="button" data-toggle="collapse" href="#collapse-'.$data['id'].'" aria-expanded="false" aria-controls="collapse-'.$data['id'].'">';
         $renderer->doc .= $title;
         $renderer->doc .= '</a>';
         if($bootstrap){
