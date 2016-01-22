@@ -49,7 +49,7 @@ class syntax_plugin_redissue extends DokuWiki_Syntax_Plugin {
         $this->Lexer->addExitPattern('</redissue>', 'plugin_redissue');
     }
     // Do the regexp
-    function handle($match, $state, $pos, $handler) {
+    function handle($match, $state, $pos, Doku_Handler $handler) {
         switch($state){
             case DOKU_LEXER_SPECIAL :
             case DOKU_LEXER_ENTER :
@@ -137,7 +137,7 @@ class syntax_plugin_redissue extends DokuWiki_Syntax_Plugin {
         }
     }
     // Dokuwiki Renderer
-    function render($mode, $renderer, $data) {	
+    function render($mode, Doku_Renderer $renderer, $data) {	
         if($mode != 'xhtml') return false;
 
         if($data['error']) {
