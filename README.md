@@ -62,10 +62,10 @@ Here is a preview of redissue:
 
 * Dokuwiki theme
 
-[Dokuwiki Theme](images/redissue_dokuwiki.png)
+![Dokuwiki Theme](images/redissue_dokuwiki.png)
 
 * With a bootstrap Theme
 
-[Bootstrap Theme](images/redissue_bootstrap.png)
+![Bootstrap Theme](images/redissue_bootstrap.png)
 
 For further information, see also [Redissue on dokuwiki.org](https://www.dokuwiki.org/plugin:redissue)
