@@ -7,10 +7,18 @@ div.redissue {
     margin-bottom: 10px;
 }
 
+a.btn.btn-primary.redissue {
+    line-height: 1;
+}
+
 img.redissue {
     height: 2.0em;
     width: 2.0em;
     /*margin-bottom: -10px;*/
+}
+
+img.redissue:hover {
+    background-image:url(images/eye.png);
 }
 
 a.redissue-status-closed {
@@ -32,3 +40,80 @@ span.status {
     color: white;
     padding: 1px;
 }
+
+div.issue-info {
+    float: right;
+}
+
+div.issue-doku {
+    border: 1px solid #eee;
+    border-left-width: 5px;
+    border-radius: 3px;
+    border-left-color: #19B317; 
+    margin-left: 1em;
+    padding: 1em;
+}
+
+/***********
+DOKUWIKI CSS THEME
+***********/
+div.border-success {
+    border-left-color: #43ac6a;
+}
+div.border-primary{
+    border-left-color: #008cba;
+}
+div.border-warning {
+    border-left-color: #e99002;
+}
+div.border-info {
+    border-left-color: #5bc0de;
+}
+div.border-danger {
+    border-left-color: #f04124;
+}
+
+span.open {
+    color: #f0f0f0;
+    background-color: #43ac6a;
+}
+span.closed {
+    color: #333333;
+    background-color: #e7e7e7;
+    text-decoration: line-through;
+}
+
+span.color-info {
+    color: #f0f0f0;
+    background-color: #5bc0de;
+}
+span.color-primary {
+    color: #f0f0f0;
+    background-color: #008cba;
+}
+span.color-success {
+    color: #f0f0f0;
+    background-color: #43ac6a;
+}
+span.color-warning {
+    color: #f0f0f0;
+    background-color: #e99002;
+}
+span.color-danger {
+    color: #f0f0f0;
+    background-color: #f04124;
+}
+
+span.badge-prio {
+    padding: 0.2em;
+}
+span.tracker {
+    color: #f0f0f0;
+    background-color: #008cba;
+}
+
+div.issue-info span{
+    font-weight: bold;
+}
+
+
