@@ -84,10 +84,16 @@ class syntax_plugin_redissue extends DokuWiki_Syntax_Plugin {
     }
 
     function _render_custom_link($renderer, $data, $title, $bootstrap) {
-        $renderer->doc .= '<a title="Voir dans Redmine" href="' . $this->_getIssueUrl($data['id']) . '"><img src="' . $this->_getImgName($data['img']) . '" class="redissue"/></a>';
-        $renderer->doc .= '<a class="btn btn-primary redissue" role="button" data-toggle="collapse" href="#collapse-'.$data['id'].'" aria-expanded="false" aria-controls="collapse-'.$data['id'].'">';
-        $renderer->doc .= $title;
-        $renderer->doc .= '</a>';
+        if ($bootstrap){
+            $renderer->doc .= '<a title="'.$this->getLang('redissue.link.issue').'" href="' . $this->_getIssueUrl($data['id']) . '"><img src="' . $this->_getImgName($data['img']) . '" class="redissue"/></a>';
+            $renderer->doc .= '<a class="btn btn-primary redissue" role="button" data-toggle="collapse" href="#collapse-'.$data['id'].'" aria-expanded="false" aria-controls="collapse-'.$data['id'].'">';
+            $renderer->doc .= $title;
+            $renderer->doc .= '</a>';
+        } else {
+            $renderer->doc .= '<a title="'.$this->getLang('redissue.link.issue').'" href="' . $this->_getIssueUrl($data['id']) . '"><img src="' . $this->_getImgName($data['img']) . '" class="redissue"/>';
+            $renderer->doc .= $title;
+            $renderer->doc .= '</a>';
+        }
         if($bootstrap){
             $renderer->doc .= '<div class="collapse" id="collapse-'.$data['id'].'">';
         }
@@ -192,6 +198,8 @@ class syntax_plugin_redissue extends DokuWiki_Syntax_Plugin {
                     if($bootstrap){
                         $renderer->doc .= ' <span class="label label-success">' . $status . '</span>';
                     }else{
+                    $renderer->doc .= ' <span class="badge-prio color-'.$color_prio.'">'.$priority['name'].'</span>';
+                    $renderer->doc .= ' <span class="badge-prio tracker">'. $tracker['name'].'</span>';
                         $renderer->doc .= ' <span class="badge-prio open">' . $status . '</span>';
                     }
                 } else {
@@ -226,19 +234,22 @@ class syntax_plugin_redissue extends DokuWiki_Syntax_Plugin {
                     };
                 }else{ //Not Bootstrap
                     $renderer->doc .= '<div class="issue-doku border-'.$color_prio.'">';
-                    $renderer->doc .= ' <span class="badge-prio color-'.$color_prio.'">'.$priority['name'].'</span>';
-                    $renderer->doc .= ' <span class="badge-prio tracker">'. $tracker['name'].'</span>';
-                    $renderer->doc .= '<div class="issue-info">';
-                    $renderer->doc .= '<span> Projet :</span>';
+                    $renderer->doc .= '<div>';
+                    $renderer->doc .= '<span><b>'.$this->getLang('redissue.project').' : </b></span>';
                     $renderer->doc .= '<a href="'.$url.'/projects/'.$project_identifier.'"> '.$project['name'].'</a>';
-                    $renderer->doc .= '<span> Auteur :</span>';
-                    $renderer->doc .= '<a> '.$author['name'].' </a>';
-                    $renderer->doc .= '<span> Assigné à :</span>';
+                    $renderer->doc .= '<span><b> '.$this->getLang('redissue.author').' : </b></span>';
+                    $renderer->doc .= ''.$author['name'].'';
+                    $renderer->doc .= '<br>';
+                    $renderer->doc .= '<span><b> '.$this->getLang('redissue.assigned').' :</b></span>';
                     $renderer->doc .= '<a> '.$assigned['name'].' </a>';
                     $renderer->doc .= '</span></div>'; // ./ Issue-info
                     $renderer->doc .= '<div class="issue-description">';
-                    $renderer->doc .= '<p>TEST 2</p>';
+                    $renderer->doc .= '<h4>'.$this->getLang('redissue.desc').' :</h4>';
+                    $renderer->doc .= '<p>'.$description.'</p>';
                     $renderer->doc .= '</div>';
+                    $renderer->doc .= '<div class="progress">';
+                    $renderer->doc .= '<span class="doku">'.$done_ratio.'% Complete</span>';
+                    $renderer->doc .= '</div>'; // ./progress
                     if($data['state'] != DOKU_LEXER_SPECIAL) {
                        $renderer->doc .= '<div class="description">';
                     };
