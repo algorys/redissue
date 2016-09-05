@@ -74,6 +74,14 @@ class syntax_plugin_redissue extends DokuWiki_Syntax_Plugin {
                 if( count($title) != 0 ) {
                     $data['title'] = $title[2];
                 }
+                // Looking for short version
+                preg_match("/short *= *(['\"])([0-1])\\1/", $match, $short);
+
+                if( $short[2] == 1 ) {
+                    $data['short'] = 1;
+                } else {
+                    $data['short'] = 0;
+                }
                 // Looking for text link
                 preg_match("/text *= *(['\"])(.*?)\\1/", $match, $text);
                 if( count($text) != 0 ) {
@@ -244,7 +252,12 @@ class syntax_plugin_redissue extends DokuWiki_Syntax_Plugin {
                        $renderer->doc .= '<div class ="issue-doku">';
                     };
                 }else{ //Not Bootstrap
-                    $renderer->doc .= '<div class="issue-doku border-'.$color_prio.'">';
+                    $renderer->doc .= '<div ';
+                    echo($data['short']);
+                    if($data['short'] > 0) {
+                        $renderer->doc .= 'style="display:none;"';
+                    }
+                    $renderer->doc .= 'class="issue-doku border-'.$color_prio.'">';
                     $renderer->doc .= '<div>';
                     $renderer->doc .= '<span><b>'.$this->getLang('redissue.project').' : </b></span>';
                     $renderer->doc .= '<a href="'.$url.'/projects/'.$project_identifier.'"> '.$project['name'].'</a>';
