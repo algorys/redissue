@@ -48,13 +48,15 @@ There is two way to use this plugin:
 
 * First Syntax:
 
-``<redissue id='#number_issue' text=link text if no right or API" /> ``
+``<redissue id='#number_issue' text=link text if no right or API" title="override title" /> ``
 
 * Second Syntax:
 
 Only needed if you want to add some additional information. Description of issue is already displayed by Redissue.
 
-``<redissue id='#number_issue' text="link if no rights or API">Additional notes...</redissue>``
+``<redissue id='#number_issue' text="link if no rights or API" title="override title" >Additional notes...</redissue>``
+
+Redissue display by default the title of issue. But if you want to override issue's title, fill title parameter. Otherwise, delete parameter or let it empty.
 
 ## Preview
 

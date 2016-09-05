@@ -69,6 +69,11 @@ class syntax_plugin_redissue extends DokuWiki_Syntax_Plugin {
                             'text'=>'##ERROR &lt;redissue&gt;: id attribute required##'
                         );
                 }
+                // Looking for override title
+                preg_match("/title *= *(['\"])(.*?)\\1/", $match, $title);
+                if( count($title) != 0 ) {
+                    $data['title'] = $title[2];
+                }
                 // Looking for text link
                 preg_match("/text *= *(['\"])(.*?)\\1/", $match, $text);
                 if( count($text) != 0 ) {
@@ -84,14 +89,20 @@ class syntax_plugin_redissue extends DokuWiki_Syntax_Plugin {
     }
 
     function _render_custom_link($renderer, $data, $title, $bootstrap) {
+        // Check if user override title.
+        if($data['title']) {
+            $cur_title = $data['title'];
+        }else{
+            $cur_title = $title;
+        }
         if ($bootstrap){
             $renderer->doc .= '<a title="'.$this->getLang('redissue.link.issue').'" href="' . $this->_getIssueUrl($data['id']) . '"><img src="' . $this->_getImgName($data['img']) . '" class="redissue"/></a>';
             $renderer->doc .= '<a class="btn btn-primary redissue" role="button" data-toggle="collapse" href="#collapse-'.$data['id'].'" aria-expanded="false" aria-controls="collapse-'.$data['id'].'">';
-            $renderer->doc .= $title;
+            $renderer->doc .= $cur_title;
             $renderer->doc .= '</a>';
         } else {
             $renderer->doc .= '<a title="'.$this->getLang('redissue.link.issue').'" href="' . $this->_getIssueUrl($data['id']) . '"><img src="' . $this->_getImgName($data['img']) . '" class="redissue"/>';
-            $renderer->doc .= $title;
+            $renderer->doc .= $cur_title;
             $renderer->doc .= '</a>';
         }
         if($bootstrap){
