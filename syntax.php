@@ -76,7 +76,6 @@ class syntax_plugin_redissue extends DokuWiki_Syntax_Plugin {
                 }
                 // Looking for short version
                 preg_match("/short *= *(['\"])([0-1])\\1/", $match, $short);
-
                 if( $short[2] == 1 ) {
                     $data['short'] = 1;
                 } else {
@@ -253,7 +252,6 @@ class syntax_plugin_redissue extends DokuWiki_Syntax_Plugin {
                     };
                 }else{ //Not Bootstrap
                     $renderer->doc .= '<div ';
-                    echo($data['short']);
                     if($data['short'] > 0) {
                         $renderer->doc .= 'style="display:none;"';
                     }
