@@ -23,7 +23,7 @@ class syntax_plugin_redissue extends DokuWiki_Syntax_Plugin {
     }
 
     public function getType() {
-        return 'container';
+        return 'substition';
     }
     /**
      * @return string Paragraph type
