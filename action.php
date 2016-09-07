@@ -24,7 +24,7 @@ class action_plugin_redissue extends DokuWiki_Action_Plugin {
             'type' => 'format',
             'title' => $this->getLang('redissue.button'),
             'icon' => '../../plugins/redissue/images/redmine.png',
-            'open' => ' <redissue id="#issue" text="text_if_no_rights_or_API" title="override_issue_title">',
+            'open' => ' <redissue id="#issue" text="text_display_if_no_rights">',
             'close' => '</redissue>',
         );
     } // insert_button
