@@ -17,10 +17,6 @@ img.redissue {
     /*margin-bottom: -10px;*/
 }
 
-img.redissue:hover {
-    background-image:url(images/eye.png);
-}
-
 a.redissue-status-closed {
     text-decoration: line-through !important;
     color: #989898;
@@ -52,6 +48,10 @@ div.issue-doku {
     border-left-color: #19B317; 
     margin-left: 1em;
     padding: 1em;
+}
+
+div.norights {
+    display: none;
 }
 
 /***********

@@ -106,11 +106,11 @@ class syntax_plugin_redissue extends DokuWiki_Syntax_Plugin {
             $renderer->doc .= '<a title="'.$this->getLang('redissue.link.issue').'" href="' . $this->_getIssueUrl($data['id']) . '"><img src="' . $this->_getImgName($data['img']) . '" class="redissue"/></a>';
             $renderer->doc .= '<a class="btn btn-primary redissue" role="button" data-toggle="collapse" href="#collapse-'.$data['id'].'" aria-expanded="false" aria-controls="collapse-'.$data['id'].'">';
             $renderer->doc .= $cur_title;
-            $renderer->doc .= '</a>';
+            $renderer->doc .= '</a> ';
         } else {
             $renderer->doc .= '<a title="'.$this->getLang('redissue.link.issue').'" href="' . $this->_getIssueUrl($data['id']) . '"><img src="' . $this->_getImgName($data['img']) . '" class="redissue"/>';
             $renderer->doc .= $cur_title;
-            $renderer->doc .= '</a>';
+            $renderer->doc .= '</a> ';
         }
         if($bootstrap){
             $renderer->doc .= '<div class="collapse" id="collapse-'.$data['id'].'">';
@@ -118,7 +118,7 @@ class syntax_plugin_redissue extends DokuWiki_Syntax_Plugin {
     }
 
     function _render_default_link($renderer, $data) {
-        $this->_render_custom_link($renderer, $data, sprintf($data['text'], $data['id']), $bootstrap);
+        $this->_render_custom_link($renderer, $data, '[#'.$data['id'].'] '.$data['text'], $bootstrap);
     }
 
     function _color_prio($client, $id_priority) {
@@ -228,7 +228,7 @@ class syntax_plugin_redissue extends DokuWiki_Syntax_Plugin {
                     }
                 }
                 
-                // GENERAL_RENDERER ---
+                // GENERAL_RENDERER --- If all is ok
                 if($bootstrap) {
                     $renderer->doc .= ' <span class="label label-'.$color_prio.'">'.$priority['name'].'</span>';
                     $renderer->doc .= ' <span class="label label-primary">'. $tracker['name'].'</span>';
@@ -277,7 +277,11 @@ class syntax_plugin_redissue extends DokuWiki_Syntax_Plugin {
                     };
                 }
             } else {
+                // If the user has no Rights
                 $this->_render_default_link($renderer, $data);
+                if ($data['state'] == DOKU_LEXER_SPECIAL OR $data['state'] == DOKU_LEXER_ENTER){
+                    $renderer->doc .= '<div><div class="norights">';
+                }
             }
         }
     }
