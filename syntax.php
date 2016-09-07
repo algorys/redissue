@@ -75,11 +75,10 @@ class syntax_plugin_redissue extends DokuWiki_Syntax_Plugin {
                     $data['title'] = $title[2];
                 }
                 // Looking for short version
-                preg_match("/short *= *(['\"])([0-1])\\1/", $match, $short);
-                if( $short[2] == 1 ) {
-                    $data['short'] = 1;
-                } else {
-                    $data['short'] = 0;
+                $data['short'] = $this->getConf('redissue.short');
+                preg_match("/short *= *(['\"])([0-1])\\1/", $match, $over_short);
+                if( $over_short ){
+                    $data['short'] = $over_short[2];
                 }
                 // Looking for text link
                 preg_match("/text *= *(['\"])(.*?)\\1/", $match, $text);

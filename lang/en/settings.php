@@ -11,4 +11,4 @@ $lang['redissue.view']     = "<div>Choose the view you want to display. This wil
 <div>Userview : doesn't manage access rights and display issue even if it's in private project.</div>";
 $lang['redissue.view_o_4'] = "Impersonate";
 $lang['redissue.view_o_2'] = "UserView";
-
+$lang['redissue.short'] = '(<b>Dokuwiki Theme only</b>) Check this if you want redissue in short mode by default. Value can be override by parameter [short="0|1"]';

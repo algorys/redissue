@@ -8,3 +8,4 @@ $conf['redissue.img']   = '';
 $conf['redissue.theme'] = '6';
 $conf['redissue.API']   = '';
 $conf['redissue.view']  = '2';
+$conf['redissue.short'] = '0';
