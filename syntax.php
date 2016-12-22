@@ -14,7 +14,7 @@ class syntax_plugin_redissue extends DokuWiki_Syntax_Plugin {
 
     // Get url of redmine
     function _getIssueUrl($id) {
-	    return $this->getConf('redissue.url').'/issues/'.$id;
+	    return $data['server'].'/issues/'.$id;
     }
     
     function _getImgName() {
@@ -58,6 +58,12 @@ class syntax_plugin_redissue extends DokuWiki_Syntax_Plugin {
                         'id'=> 0,
                         'text'=>$this->getLang('redissue.text.default')
                     );
+
+                preg_match("/server *= *(['\"])(.*?)\\1/", $match, $server);
+                $data['server'] = $this->getConf('redissue.url');
+                if ($server) {
+                    $data['server'] = $server[2];
+                }
                 // Looking for id
                 preg_match("/id *= *(['\"])#(\\d+)\\1/", $match, $id);
                 if( count($id) != 0 ) {
@@ -172,7 +178,7 @@ class syntax_plugin_redissue extends DokuWiki_Syntax_Plugin {
         if(empty($apiKey)){
             $this->_render_default_link($renderer, $data);
         } else {
-            $url = $this->getConf('redissue.url');
+            $url = $data['server'];
             $client = new Redmine\Client($url, $apiKey);
             // Get Id user of the Wiki if Impersonate
             $view = $this->getConf('redissue.view');
