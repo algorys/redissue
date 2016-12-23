@@ -44,6 +44,8 @@ You can configure the plugin in the Config Manager of DokuWiki:
 
 ## Syntax
 
+### Common options
+
 There is two way to use this plugin:
 
 * First Syntax:
@@ -56,7 +58,26 @@ Only needed if you want to add some additional information. Description of issue
 
 ``<redissue id='#number_issue' text="text_if_no_rights_or_API" >Additional notes...</redissue>``
 
-Other options:
+### Other options:
+
+* server: override the server url and the API key. You must define these in `server.json` file at root of redissue folder. Then use: `server="first".
+
+Example of _server.json_ file:
+
+```json
+{
+    "first": {
+        "url": "http://myfirst.redmine.com",
+        "api_token": "abcdefghijklmnopqrstuvwxyz0123456789"
+    },
+    "second": {
+        "url": "http://mysecond.redmine.com",
+        "api_token": "zyxwvutsrqponmlkjihgfedcba9876543210"
+    }
+}
+```
+
+If server key is bad (e.g: call _flirt_ instead _first_), redissue take the one who is set in dokuwiki settings. If url or api_token are wrong, an error message is display instead of redissue.
 
 * title: you can override title if it's too long or other reason: `title="my title"`.
 * short: (**dokuwiki theme only**, bootstrap not needed this functionnality). If you've dokuwiki theme, you can hide additional information with short: `short="1"`.
