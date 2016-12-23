@@ -1,0 +1,10 @@
+{
+    "default": {
+        "url": "http://redmine.domain.com",
+        "api_token": "a0a0a0a0a0a0a0a0a0a0a0a"
+    },
+    "second": {
+        "url": "http://redmine.anotherdomain.com",
+        "api_token": "b1b1b1b1b1b1b1b1b1b1b1b1b"
+    }
+}

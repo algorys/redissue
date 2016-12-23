@@ -7,14 +7,18 @@
 
 if (!defined('DOKU_INC')) die();
 require 'vendor/php-redmine-api/lib/autoload.php';
-
+//require_once "json.php";
 
 class syntax_plugin_redissue extends DokuWiki_Syntax_Plugin {
     const RI_IMPERSONATE = 4;
 
-    // Get url of redmine
+    // Get url of redmine issue
     function _getIssueUrl($id) {
-	    return $data['server'].'/issues/'.$id;
+        if(isset($data['server_url'])){
+	        return $data['server_url'].'/issues/'.$id;
+        } else {
+            return $this->getConf('redissue.url').'/issues/'.$id;
+        }
     }
     
     function _getImgName() {
@@ -28,6 +32,16 @@ class syntax_plugin_redissue extends DokuWiki_Syntax_Plugin {
     /**
      * @return string Paragraph type
      */
+
+    public function getDataFromAlias($server) {
+        $json_file = file_get_contents(__DIR__.'/server.json');
+        $json_data = json_decode($json_file, true);
+        if(isset($json_data[$server])) {
+            return $json_data[$server];
+        } else {
+            return null;
+        }
+    }
 
     public function getPType() {
         return 'normal';
@@ -60,9 +74,13 @@ class syntax_plugin_redissue extends DokuWiki_Syntax_Plugin {
                     );
 
                 preg_match("/server *= *(['\"])(.*?)\\1/", $match, $server);
-                $data['server'] = $this->getConf('redissue.url');
+                $server_url = $this->getConf('redissue.url');
                 if ($server) {
-                    $data['server'] = $server[2];
+                    $server_data = $this->getDataFromAlias($server[2]);
+                    if( ! is_null($server_data)){
+                        $data['server_url'] = $server_data['url'];
+                        $data['server_token'] = $server_data['api_token'];
+                    }
                 }
                 // Looking for id
                 preg_match("/id *= *(['\"])#(\\d+)\\1/", $match, $id);
@@ -175,10 +193,16 @@ class syntax_plugin_redissue extends DokuWiki_Syntax_Plugin {
             $bootstrap = True;
         }
         $apiKey = ($this->getConf('redissue.API'));
+        if (isset($data['server_token'])) {
+            $apiKey = $data['server_token'];
+        }
         if(empty($apiKey)){
             $this->_render_default_link($renderer, $data);
         } else {
-            $url = $data['server'];
+            $url = $this->getConf('redissue.url');
+            if (isset($data['server_url'])) {
+                $url = $data['server_url'];
+            }
             $client = new Redmine\Client($url, $apiKey);
             // Get Id user of the Wiki if Impersonate
             $view = $this->getConf('redissue.view');
@@ -188,7 +212,12 @@ class syntax_plugin_redissue extends DokuWiki_Syntax_Plugin {
                 $client->setImpersonateUser($redUser);
             }
             $issue = $client->api('issue')->show($data['id']);
-            if($issue) {
+ 
+            // If server is bad
+            if($issue == 'Syntax error') {
+                $renderer->doc .= '<p><b>Redissue ERROR:</b> Server exist in JSON config but seems not valid ! Please check your <b>url</b> or your <b>API Key</b> !</p>';
+            // If server is good
+            } elseif (isset($issue['issue'])) {
                 // ALL_INFO --- Get Info from the Issue
                 $project = $issue['issue']['project'];
                 $project_identifier = $this->_project_identifier($client, $project['name']);
