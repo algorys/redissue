@@ -1,7 +1,7 @@
 base   redissue
 author Algorys
 email  ttamalfor@gmail.com
-date   2016-09-07
+date   2016-12-23
 name   redissue
 desc   Insert an issue of redmine and her data.
 
