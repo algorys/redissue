@@ -34,10 +34,10 @@ Download this plugin into your ``${dokuwiki_root}/lib/plugins`` folder and resta
 
 You can configure the plugin in the Config Manager of DokuWiki:
 
-* redissue.url: Put your Redmine's url server, without a slash ending. Example : ``http://myredmine.com``
+* redissue.url: Put your Redmine's url server, without a slash ending. Example : ``http://myredmine.com``. This setting can be override by _server_ option.
 * redissue.img: Maybe you have a custom icon for your Redmine installation. You can put image'url here. Example : ``http://www.example.com/image.png``
 * redissue.theme: If you have the theme [Bootstrap 3](https://www.dokuwiki.org/template:bootstrap3) installed (or another supported _Bootstrap_ theme), you can set redissue to bootstrap. Otherwise, simply choose theme Dokuwiki.
-* redissue.API: Set your Redmine API's key, preference Administrator key.
+* redissue.API: Set your Redmine API's key, preference Administrator key. This setting can be override by _server_ option.
 * redissue.view: Choose the view you want to display. This will depend on the wiki user's access rights in Redmine.
   * Impersonate: select this if your wiki's users have the same UID as Redmine's users. e.g. : LDAP authentication. Redissue then will manage rights based on private or public projects.
   * Userview: doesn't manage access rights and display issue even if it's in private project.
@@ -60,7 +60,7 @@ Only needed if you want to add some additional information. Description of issue
 
 ### Other options:
 
-* server: override the server url and the API key. You must define these in `server.json` file at root of redissue folder. Then use: `server="first".
+* server: override the server url and the API key. You must define these in `server.json` file at root of redissue folder.
 
 Example of _server.json_ file:
 
@@ -77,7 +77,9 @@ Example of _server.json_ file:
 }
 ```
 
-If server key is bad (e.g: call _flirt_ instead _first_), redissue take the one who is set in dokuwiki settings. If url or api_token are wrong, an error message is display instead of redissue.
+Then simply add your server with: `server="first".
+
+**Note:** If server key is bad (e.g: call _flirt_ instead _first_), redissue take the one who is set in dokuwiki settings. If url or api_token are wrong, an error message is display instead of redissue.
 
 * title: you can override title if it's too long or other reason: `title="my title"`.
 * short: (**dokuwiki theme only**, bootstrap not needed this functionnality). If you've dokuwiki theme, you can hide additional information with short: `short="1"`.
