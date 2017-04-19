@@ -109,6 +109,16 @@ class syntax_plugin_redissue extends DokuWiki_Syntax_Plugin {
                 if( count($text) != 0 ) {
                     $data['text'] = $text[2];
                 }
+                // Looking for project id
+                preg_match("/project *= *(['\"])(.*?)\\1/", $match, $project);
+                if( count($project) != 0 ) {
+                    $data['project_id'] = $project[2];
+                }
+                // looking for tracker_id
+                preg_match("/tracker *= *(['\"])(.*?)\\1/", $match, $tracker);
+                if( count($tracker) != 0 ) {
+                    $data['tracker_id'] = $tracker[2];
+                }
 
                 return $data;
             case DOKU_LEXER_UNMATCHED :
@@ -118,30 +128,30 @@ class syntax_plugin_redissue extends DokuWiki_Syntax_Plugin {
         }
     }
 
-    function _render_custom_link($renderer, $data, $title, $bootstrap) {
+    function _render_custom_link($renderer, $data, $issue_id, $subject, $bootstrap) {
         // Check if user override title.
         if($data['title']) {
             $cur_title = $data['title'];
         }else{
-            $cur_title = $title;
+            $cur_title = '[#'.$issue_id.'] ' . $subject;
         }
         if ($bootstrap){
-            $renderer->doc .= '<a title="'.$this->getLang('redissue.link.issue').'" href="' . $this->_getIssueUrl($data['id']) . '"><img src="' . $this->_getImgName($data['img']) . '" class="redissue"/></a>';
-            $renderer->doc .= '<a class="btn btn-primary redissue" role="button" data-toggle="collapse" href="#collapse-'.$data['id'].'" aria-expanded="false" aria-controls="collapse-'.$data['id'].'">';
+            $renderer->doc .= '<a title="'.$this->getLang('redissue.link.issue').'" href="' . $this->_getIssueUrl($issue_id) . '"><img src="' . $this->_getImgName($data['img']) . '" class="redissue"/></a>';
+            $renderer->doc .= '<a class="btn btn-primary redissue" role="button" data-toggle="collapse" href="#collapse-'.$issue_id.'" aria-expanded="false" aria-controls="collapse-'.$issue_id.'">';
             $renderer->doc .= $cur_title;
             $renderer->doc .= '</a> ';
         } else {
-            $renderer->doc .= '<a title="'.$this->getLang('redissue.link.issue').'" href="' . $this->_getIssueUrl($data['id']) . '"><img src="' . $this->_getImgName($data['img']) . '" class="redissue"/>';
+            $renderer->doc .= '<a title="'.$this->getLang('redissue.link.issue').'" href="' . $this->_getIssueUrl($issue_id) . '"><img src="' . $this->_getImgName($data['img']) . '" class="redissue"/>';
             $renderer->doc .= $cur_title;
             $renderer->doc .= '</a> ';
         }
         if($bootstrap){
-            $renderer->doc .= '<div class="collapse" id="collapse-'.$data['id'].'">';
+            $renderer->doc .= '<div class="collapse" id="collapse-'.$issue_id.'">';
         }
     }
 
-    function _render_default_link($renderer, $data) {
-        $this->_render_custom_link($renderer, $data, '[#'.$data['id'].'] '.$data['text'], $bootstrap);
+    function _render_default_link($renderer, $data, $bootstrap) {
+        $this->_render_custom_link($renderer, $data, $data['id'], $data['text'], $bootstrap);
     }
 
     function _color_prio($client, $id_priority) {
@@ -188,16 +198,18 @@ class syntax_plugin_redissue extends DokuWiki_Syntax_Plugin {
 
     // Main render_link
     function _render_link($renderer, $data) {
+        // Check Bootstrap
         $bootstrap = False;
         if ($this->getConf('redissue.theme') == 8){
             $bootstrap = True;
         }
+        // Check API_KEY
         $apiKey = ($this->getConf('redissue.API'));
         if (isset($data['server_token'])) {
             $apiKey = $data['server_token'];
         }
         if(empty($apiKey)){
-            $this->_render_default_link($renderer, $data);
+            $this->_render_default_link($renderer, $data, $bootstrap);
         } else {
             $url = $this->getConf('redissue.url');
             if (isset($data['server_url'])) {
@@ -211,114 +223,134 @@ class syntax_plugin_redissue extends DokuWiki_Syntax_Plugin {
                 // Attempt to collect information with this user
                 $client->setImpersonateUser($redUser);
             }
-            $issue = $client->api('issue')->show($data['id']);
- 
-            // If server is bad
-            if($issue == 'Syntax error') {
-                $renderer->doc .= '<p><b>Redissue ERROR:</b> Server exist in JSON config but seems not valid ! Please check your <b>url</b> or your <b>API Key</b> !</p>';
-            // If server is good
-            } elseif (isset($issue['issue'])) {
-                // ALL_INFO --- Get Info from the Issue
-                $project = $issue['issue']['project'];
-                $project_identifier = $this->_project_identifier($client, $project['name']);
-                $tracker = $issue['issue']['tracker'];
-                $status = $issue['issue']['status']['name'];
-                $author = $issue['issue']['author'];
-                $assigned = $issue['issue']['assigned_to'];
-                $subject = $issue['issue']['subject'];
-                $description = $issue['issue']['description'];
-                $done_ratio = $issue['issue']['done_ratio'];
-                // RENDERER_MAIN_LINK ---- Get the Id Status
-                $myStatusId = $issue['issue']['status']['id'];
-                $statuses = $client->api('issue_status')->all();
-                // Browse existing statuses
-                for($i = 0; $i < count($statuses['issue_statuses']); $i++) {
-                    $foundStatus = $statuses['issue_statuses'][$i];
-                    if($foundStatus['id'] == $myStatusId) {
-                        // Get is_closed value
-                        $isClosed = $foundStatus['is_closed'];
-                    }
-                }
-                // If isClosed not empty, change css
-                $this->_render_custom_link($renderer, $data, "[#" . $data['id'] . "] " . $subject, $bootstrap);
-                
-                // PRIORITIES --- Get priority and define color
-                $priority = $issue['issue']['priority'];
-                $id_priority = $priority['id'];
-                $color_prio = $this->_color_prio($client, $id_priority);
-                if(!$isClosed){
-                    if($bootstrap){
-                        $renderer->doc .= ' <span class="label label-success">' . $status . '</span>';
-                    }else{
-                    $renderer->doc .= ' <span class="badge-prio color-'.$color_prio.'">'.$priority['name'].'</span>';
-                    $renderer->doc .= ' <span class="badge-prio tracker">'. $tracker['name'].'</span>';
-                        $renderer->doc .= ' <span class="badge-prio open">' . $status . '</span>';
+            if(array_key_exists('project_id', $data) && array_key_exists('tracker_id', $data)) {
+                $issues = $client->issue->all([
+                    'project_id' => $data['project_id'],
+                    'tracker_id' => $data['tracker_id']
+                ]);
+                if(isset($issues['issues'])) {
+                    for ($i = 0; $i < count($issues['issues']); $i++) {
+                        $this->_display_issue($renderer, $data, $bootstrap, $client, $issues['issues'][$i]['id']);
                     }
                 } else {
-                    if($bootstrap){
-                        $renderer->doc .= ' <span class="label label-default">' . $status . '</span>';
-                    }else{
-                        $renderer->doc .= ' <span class="badge-prio closed">' . $status . '</span>';
-                    }
-                }
-                
-                // GENERAL_RENDERER --- If all is ok
-                if($bootstrap) {
-                    $renderer->doc .= ' <span class="label label-'.$color_prio.'">'.$priority['name'].'</span>';
-                    $renderer->doc .= ' <span class="label label-primary">'. $tracker['name'].'</span>';
-                    $renderer->doc .= '<div class="well">';
-                    $renderer->doc .= '<div class="issue-info"><dl class="dl-horizontal">';
-                    $renderer->doc .= '<dt><icon class="glyphicon glyphicon-info-sign">&nbsp;</icon>Projet :</dt>';
-                    $renderer->doc .= '<dd><a href="'.$url.'/projects/'.$project_identifier.'">'.$project['name'].'</a></dd>';
-                    $renderer->doc .= '<dt>Auteur :</dt>';
-                    $renderer->doc .= '<dd>'.$author['name'].' </dd>';
-                    $renderer->doc .= '<dt>Assigné à :</dt>';
-                    $renderer->doc .= '<dd>'.$assigned['name'].' </dd>';
-                    $renderer->doc .= '</dl></div>'; // ./ Issue-info
-                    $renderer->doc .= '<h4>Description</h4><p>'.$description.'</p>';
-                    $renderer->doc .= '<div class="progress">';
-                    $renderer->doc .= '<span class="progress-bar" role="progressbar" aria-valuenow="70" aria-valuemin="0" aria-valuemax="100" style="width:'.$done_ratio.'%">';
-                    $renderer->doc .= '<span class="doku">'.$done_ratio.'% Complete</span>';
-                    $renderer->doc .= '</span></div>'; // ./progress
-                    $renderer->doc .= '</div>'; // ./ well 
-                    if($data['state'] != DOKU_LEXER_SPECIAL) {
-                       $renderer->doc .= '<div class ="issue-doku">';
-                    };
-                }else{ //Not Bootstrap
-                    $renderer->doc .= '<div ';
-                    if($data['short'] > 0) {
-                        $renderer->doc .= 'style="display:none;"';
-                    }
-                    $renderer->doc .= 'class="issue-doku border-'.$color_prio.'">';
-                    $renderer->doc .= '<div>';
-                    $renderer->doc .= '<span><b>'.$this->getLang('redissue.project').' : </b></span>';
-                    $renderer->doc .= '<a href="'.$url.'/projects/'.$project_identifier.'"> '.$project['name'].'</a>';
-                    $renderer->doc .= '<span><b> '.$this->getLang('redissue.author').' : </b></span>';
-                    $renderer->doc .= ''.$author['name'].'';
-                    $renderer->doc .= '<br>';
-                    $renderer->doc .= '<span><b> '.$this->getLang('redissue.assigned').' :</b></span>';
-                    $renderer->doc .= '<a> '.$assigned['name'].' </a>';
-                    $renderer->doc .= '</span></div>'; // ./ Issue-info
-                    $renderer->doc .= '<div class="issue-description">';
-                    $renderer->doc .= '<h4>'.$this->getLang('redissue.desc').' :</h4>';
-                    $renderer->doc .= '<p>'.$description.'</p>';
-                    $renderer->doc .= '</div>';
-                    $renderer->doc .= '<div class="progress">';
-                    $renderer->doc .= '<span class="doku">'.$done_ratio.'% Complete</span>';
-                    $renderer->doc .= '</div>'; // ./progress
-                    if($data['state'] != DOKU_LEXER_SPECIAL) {
-                       $renderer->doc .= '<div class="description">';
-                    };
+                    $renderer->doc .= '<p style="color: red;">REDISSUE: "project" ID or "tracker" ID is invalid ! Redissue display single issue instead !</p>';
+                    $this->_display_issue($renderer, $data, $bootstrap, $client, $data['id']);
                 }
             } else {
-                // If the user has no Rights
-                $this->_render_default_link($renderer, $data);
-                if ($data['state'] == DOKU_LEXER_SPECIAL OR $data['state'] == DOKU_LEXER_ENTER){
-                    $renderer->doc .= '<div><div class="norights">';
-                }
+                $this->_display_issue($renderer, $data, $bootstrap, $client, $data['id']);
             }
         }
     }
+
+    function _display_issue($renderer, $data, $bootstrap, $client, $issue_id) {
+        // Issue Id
+        $issue = $client->api('issue')->show($issue_id);
+
+        // If server is wrong
+        if($issue == 'Syntax error') {
+            $renderer->doc .= '<p><b>Redissue ERROR:</b> Server exist in JSON config but seems not valid ! Please check your <b>url</b> or your <b>API Key</b> !</p>';
+        // If server is good
+        } elseif (isset($issue['issue'])) {
+            // REDMINE DATA --- Get Info from the Issue
+            $project = $issue['issue']['project'];
+            $project_identifier = $this->_project_identifier($client, $project['name']);
+            $tracker = $issue['issue']['tracker'];
+            $status = $issue['issue']['status']['name'];
+            $author = $issue['issue']['author'];
+            $assigned = $issue['issue']['assigned_to'];
+            $subject = $issue['issue']['subject'];
+            $description = $issue['issue']['description'];
+            $done_ratio = $issue['issue']['done_ratio'];
+            // RENDERER_MAIN_LINK ---- Get the Id Status
+            $myStatusId = $issue['issue']['status']['id'];
+            $statuses = $client->api('issue_status')->all();
+            // Browse existing statuses
+            for($i = 0; $i < count($statuses['issue_statuses']); $i++) {
+                $foundStatus = $statuses['issue_statuses'][$i];
+                if($foundStatus['id'] == $myStatusId) {
+                    // Get is_closed value
+                    $isClosed = $foundStatus['is_closed'];
+                }
+            }
+
+            // RENDERER
+            $renderer->doc .= '<p>';
+            $this->_render_custom_link($renderer, $data, $issue_id, $subject, $bootstrap);
+ 
+            // PRIORITIES --- Get priority and define color
+            $priority = $issue['issue']['priority'];
+            $id_priority = $priority['id'];
+            $color_prio = $this->_color_prio($client, $id_priority);
+            if(!$isClosed){
+                if($bootstrap){
+                    $renderer->doc .= ' <span class="label label-success">' . $status . '</span>';
+                }else{
+                $renderer->doc .= ' <span class="badge-prio color-'.$color_prio.'">'.$priority['name'].'</span>';
+                $renderer->doc .= ' <span class="badge-prio tracker">'. $tracker['name'].'</span>';
+                    $renderer->doc .= ' <span class="badge-prio open">' . $status . '</span>';
+                }
+            } else {
+                if($bootstrap){
+                    $renderer->doc .= ' <span class="label label-default">' . $status . '</span>';
+                }else{
+                    $renderer->doc .= ' <span class="badge-prio closed">' . $status . '</span>';
+                }
+            }
+            
+            // GENERAL_RENDERER --- If all is ok
+            if($bootstrap) {
+                $renderer->doc .= ' <span class="label label-'.$color_prio.'">'.$priority['name'].'</span>';
+                $renderer->doc .= ' <span class="label label-primary">'. $tracker['name'].'</span>';
+                $renderer->doc .= '<div class="well">';
+                $renderer->doc .= '<div class="issue-info"><dl class="dl-horizontal">';
+                $renderer->doc .= '<dt><icon class="glyphicon glyphicon-info-sign">&nbsp;</icon>Projet :</dt>';
+                $renderer->doc .= '<dd><a href="'.$url.'/projects/'.$project_identifier.'">'.$project['name'].'</a></dd>';
+                $renderer->doc .= '<dt>Auteur :</dt>';
+                $renderer->doc .= '<dd>'.$author['name'].' </dd>';
+                $renderer->doc .= '<dt>Assigné à :</dt>';
+                $renderer->doc .= '<dd>'.$assigned['name'].' </dd>';
+                $renderer->doc .= '</dl></div>'; // ./ Issue-info
+                $renderer->doc .= '<h4>Description</h4><p>'.$description.'</p>';
+                $renderer->doc .= '<div class="progress">';
+                $renderer->doc .= '<span class="progress-bar" role="progressbar" aria-valuenow="70" aria-valuemin="0" aria-valuemax="100" style="width:'.$done_ratio.'%">';
+                $renderer->doc .= '<span class="doku">'.$done_ratio.'% Complete</span>';
+                $renderer->doc .= '</span></div>'; // ./progress
+                $renderer->doc .= '</div>'; // ./ well 
+                $renderer->doc .= '</div>';
+            }else{ //Not Bootstrap
+                $renderer->doc .= '<div ';
+                if($data['short'] > 0) {
+                    $renderer->doc .= 'style="display:none;"';
+                }
+                $renderer->doc .= 'class="issue-doku border-'.$color_prio.'">';
+                $renderer->doc .= '<div>';
+                $renderer->doc .= '<span><b>'.$this->getLang('redissue.project').' : </b></span>';
+                $renderer->doc .= '<a href="'.$url.'/projects/'.$project_identifier.'"> '.$project['name'].'</a>';
+                $renderer->doc .= '<span><b> '.$this->getLang('redissue.author').' : </b></span>';
+                $renderer->doc .= ''.$author['name'].'';
+                $renderer->doc .= '<br>';
+                $renderer->doc .= '<span><b> '.$this->getLang('redissue.assigned').' :</b></span>';
+                $renderer->doc .= '<a> '.$assigned['name'].' </a>';
+                $renderer->doc .= '</span></div>'; // ./ Issue-info
+                $renderer->doc .= '<div class="issue-description">';
+                $renderer->doc .= '<h4>'.$this->getLang('redissue.desc').' :</h4>';
+                $renderer->doc .= '<p>'.$description.'</p>';
+                $renderer->doc .= '</div>';
+                $renderer->doc .= '<div class="progress">';
+                $renderer->doc .= '<span class="doku">'.$done_ratio.'% Complete</span>';
+                $renderer->doc .= '</div>'; // ./progress
+                $renderer->doc .= '</div>';
+            }
+            $renderer->doc .= '</p>';
+        } else {
+            // If the user has no Rights
+            $this->_render_default_link($renderer, $data, $boostrap);
+            if ($data['state'] == DOKU_LEXER_SPECIAL OR $data['state'] == DOKU_LEXER_ENTER){
+                $renderer->doc .= '<div><div class="norights">';
+            }
+        }
+    }
+
     // Dokuwiki Renderer
     function render($mode, Doku_Renderer $renderer, $data) {	
         if($mode != 'xhtml') return false;
@@ -331,7 +363,6 @@ class syntax_plugin_redissue extends DokuWiki_Syntax_Plugin {
         switch($data['state']) {
             case DOKU_LEXER_SPECIAL :
                 $this->_render_link($renderer, $data);
-                $renderer->doc .= '</div>';
                 break;
             case DOKU_LEXER_ENTER :
                 $this->_render_link($renderer, $data);
