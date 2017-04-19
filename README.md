@@ -78,9 +78,11 @@ Example of _server.json_ file:
 }
 ```
 
-Then simply add your server with: `server="first" in redissue syntax.
+Then simply add your server with: `server="first"` in redissue syntax.
 
-**Note:** If server url or key in json file is wrong or if you put a wrong name in "server" parameter(e.g: call _flirt_ instead _first_), redissue take the one who is set in dokuwiki settings. If **url** or **api_token** are wrong, an error message is display instead of redissue.
+**Note:** If server url or key in json file is wrong or if you put a wrong name in "server" parameter(e.g: call _flirt_ instead _first_), redissue take the one who is set in dokuwiki settings. 
+
+If **url** or **api_token** are wrong everywhere, an error message will be displayed instead of redissue.
 
 * title: you can override title if it's too long or other reason: `title="my title"`.
 * short: (**dokuwiki theme only**, bootstrap not needed this functionnality). If you've dokuwiki theme, you can hide additional information with short: `short="1"`.
