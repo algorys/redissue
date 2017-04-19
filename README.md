@@ -13,11 +13,12 @@ Plugin Dokuwiki display issues of Redmine and keep the rights of Redmine too. Re
 Redissue needs [Php-Redmine-API](https://github.com/kbsali/php-redmine-api) to work. Download it inside the ROOT of your redissue's folder or inside ``/usr/share/php`` folder. The second way is better if you use [Redproject](https://www.dokuwiki.org/plugin:redissue) too, as you've just to install API once time.
 
 ```bash
-$ mkdir vendor
-$ cd vendor
-$ git clone https://github.com/kbsali/php-redmine-api.git
-$ cd php-redmine-api
-$ git checkout v1.5.5
+mkdir vendor
+cd vendor
+git clone https://github.com/kbsali/php-redmine-api.git
+cd php-redmine-api
+# Go to last version. Use "git describe --abbrev=0" to see last tag.
+git checkout v1.5.x
 ```
 
 Don't forget to install the requirements of PhP-Redmine-API :
@@ -50,17 +51,17 @@ There is two way to use this plugin:
 
 * First Syntax:
 
-``<redissue id='#number_issue' text="text_if_no_rights_or_API" /> ``
+`<redissue id='#number_issue' text="text_if_no_rights_or_API" /> `
 
 * Second Syntax:
 
 Only needed if you want to add some additional information. Description of issue is already displayed by Redissue.
 
-``<redissue id='#number_issue' text="text_if_no_rights_or_API" >Additional notes...</redissue>``
+`<redissue id='#number_issue' text="text_if_no_rights_or_API" >Additional informations...</redissue>`
 
 ### Other options:
 
-* server: override the server url and the API key. You must define these in `server.json` file at root of redissue folder.
+* server: override the server url and the API key defined in Redmine **settings**. You must define these in a json file called `server.json`. This file must be at root of redissue folder.
 
 Example of _server.json_ file:
 
@@ -77,9 +78,9 @@ Example of _server.json_ file:
 }
 ```
 
-Then simply add your server with: `server="first".
+Then simply add your server with: `server="first" in redissue syntax.
 
-**Note:** If server key is bad (e.g: call _flirt_ instead _first_), redissue take the one who is set in dokuwiki settings. If url or api_token are wrong, an error message is display instead of redissue.
+**Note:** If server url or key in json file is wrong or if you put a wrong name in "server" parameter(e.g: call _flirt_ instead _first_), redissue take the one who is set in dokuwiki settings. If **url** or **api_token** are wrong, an error message is display instead of redissue.
 
 * title: you can override title if it's too long or other reason: `title="my title"`.
 * short: (**dokuwiki theme only**, bootstrap not needed this functionnality). If you've dokuwiki theme, you can hide additional information with short: `short="1"`.
