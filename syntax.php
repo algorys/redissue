@@ -12,15 +12,6 @@ require 'vendor/php-redmine-api/lib/autoload.php';
 class syntax_plugin_redissue extends DokuWiki_Syntax_Plugin {
     const RI_IMPERSONATE = 4;
 
-    // Get url of redmine issue
-    function _getIssueUrl($id) {
-        if(isset($data['server_url'])){
-	        return $data['server_url'].'/issues/'.$id;
-        } else {
-            return $this->getConf('redissue.url').'/issues/'.$id;
-        }
-    }
-    
     function _getImgName() {
         // If empty (False) get the second part
         return $this->getConf('redissue.img') ?: 'lib/plugins/redissue/images/redmine.png' ;
@@ -72,7 +63,7 @@ class syntax_plugin_redissue extends DokuWiki_Syntax_Plugin {
                         'id'=> 0,
                         'text'=>$this->getLang('redissue.text.default')
                     );
-
+                // Redmine Server
                 preg_match("/server *= *(['\"])(.*?)\\1/", $match, $server);
                 $server_url = $this->getConf('redissue.url');
                 if ($server) {
@@ -82,7 +73,7 @@ class syntax_plugin_redissue extends DokuWiki_Syntax_Plugin {
                         $data['server_token'] = $server_data['api_token'];
                     }
                 }
-                // Looking for id
+                // Issue Id
                 preg_match("/id *= *(['\"])#(\\d+)\\1/", $match, $id);
                 if( count($id) != 0 ) {
                     $data['id'] = $id[2];
@@ -90,31 +81,31 @@ class syntax_plugin_redissue extends DokuWiki_Syntax_Plugin {
                     return array(
                             'state'=>$state,
                             'error'=>true,
-                            'text'=>'##ERROR &lt;redissue&gt;: id attribute required##'
+                            'text'=>'<p style="color: red;">REDISSUE plugin: option "id" must be filled ! </p>',
                         );
                 }
-                // Looking for override title
+                // Title
                 preg_match("/title *= *(['\"])(.*?)\\1/", $match, $title);
                 if( count($title) != 0 ) {
                     $data['title'] = $title[2];
                 }
-                // Looking for short version
+                // Short
                 $data['short'] = $this->getConf('redissue.short');
                 preg_match("/short *= *(['\"])([0-1])\\1/", $match, $over_short);
                 if( $over_short ){
                     $data['short'] = $over_short[2];
                 }
-                // Looking for text link
+                // Text Access
                 preg_match("/text *= *(['\"])(.*?)\\1/", $match, $text);
                 if( count($text) != 0 ) {
                     $data['text'] = $text[2];
                 }
-                // Looking for project id
+                // Project Id
                 preg_match("/project *= *(['\"])(.*?)\\1/", $match, $project);
                 if( count($project) != 0 ) {
                     $data['project_id'] = $project[2];
                 }
-                // looking for tracker_id
+                // Tracker Id
                 preg_match("/tracker *= *(['\"])(.*?)\\1/", $match, $tracker);
                 if( count($tracker) != 0 ) {
                     $data['tracker_id'] = $tracker[2];
@@ -136,12 +127,12 @@ class syntax_plugin_redissue extends DokuWiki_Syntax_Plugin {
             $cur_title = '[#'.$issue_id.'] ' . $subject;
         }
         if ($bootstrap){
-            $renderer->doc .= '<a title="'.$this->getLang('redissue.link.issue').'" href="' . $this->_getIssueUrl($issue_id) . '"><img src="' . $this->_getImgName($data['img']) . '" class="redissue"/></a>';
+            $renderer->doc .= '<a title="'.$this->getLang('redissue.link.issue').'" href="' . $this->_getIssueUrl($issue_id, $data) . '"><img src="' . $this->_getImgName($data['img']) . '" class="redissue"/></a>';
             $renderer->doc .= '<a class="btn btn-primary redissue" role="button" data-toggle="collapse" href="#collapse-'.$issue_id.'" aria-expanded="false" aria-controls="collapse-'.$issue_id.'">';
             $renderer->doc .= $cur_title;
             $renderer->doc .= '</a> ';
         } else {
-            $renderer->doc .= '<a title="'.$this->getLang('redissue.link.issue').'" href="' . $this->_getIssueUrl($issue_id) . '"><img src="' . $this->_getImgName($data['img']) . '" class="redissue"/>';
+            $renderer->doc .= '<a title="'.$this->getLang('redissue.link.issue').'" href="' . $this->_getIssueUrl($issue_id, $data) . '"><img src="' . $this->_getImgName($data['img']) . '" class="redissue"/>';
             $renderer->doc .= $cur_title;
             $renderer->doc .= '</a> ';
         }
@@ -196,6 +187,19 @@ class syntax_plugin_redissue extends DokuWiki_Syntax_Plugin {
             return $project_identifier;
     }
 
+    // Get/ url of redmine issue
+    function _getIssueUrl($id, $data) {
+        return $this->_get_redmine_url($data).'/issues/'.$id;
+    }
+    
+    function _get_redmine_url($data) {
+        $url = $this->getConf('redissue.url');
+        if (isset($data['server_url'])) {
+            $url = $data['server_url'];
+        }
+        return $url;
+    }
+
     // Main render_link
     function _render_link($renderer, $data) {
         // Check Bootstrap
@@ -211,10 +215,7 @@ class syntax_plugin_redissue extends DokuWiki_Syntax_Plugin {
         if(empty($apiKey)){
             $this->_render_default_link($renderer, $data, $bootstrap);
         } else {
-            $url = $this->getConf('redissue.url');
-            if (isset($data['server_url'])) {
-                $url = $data['server_url'];
-            }
+            $url = $this->_get_redmine_url($data);
             $client = new Redmine\Client($url, $apiKey);
             // Get Id user of the Wiki if Impersonate
             $view = $this->getConf('redissue.view');
@@ -233,7 +234,7 @@ class syntax_plugin_redissue extends DokuWiki_Syntax_Plugin {
                         $this->_display_issue($renderer, $data, $bootstrap, $client, $issues['issues'][$i]['id']);
                     }
                 } else {
-                    $renderer->doc .= '<p style="color: red;">REDISSUE: "project" ID or "tracker" ID is invalid ! Redissue display single issue instead !</p>';
+                    $renderer->doc .= '<p style="color: red;">REDISSUE plugin: "project" ID or "tracker" ID is invalid ! Redissue display single issue instead !</p>';
                     $this->_display_issue($renderer, $data, $bootstrap, $client, $data['id']);
                 }
             } else {
@@ -245,10 +246,11 @@ class syntax_plugin_redissue extends DokuWiki_Syntax_Plugin {
     function _display_issue($renderer, $data, $bootstrap, $client, $issue_id) {
         // Issue Id
         $issue = $client->api('issue')->show($issue_id);
+        $url = $this->_get_redmine_url($data);
 
         // If server is wrong
         if($issue == 'Syntax error') {
-            $renderer->doc .= '<p><b>Redissue ERROR:</b> Server exist in JSON config but seems not valid ! Please check your <b>url</b> or your <b>API Key</b> !</p>';
+            $renderer->doc .= '<p style="color: red;">REDISSUE plugin: Server exist in JSON config but seems not valid ! Please check your <b>url</b> or your <b>API Key</b> !</p>';
         // If server is good
         } elseif (isset($issue['issue'])) {
             // REDMINE DATA --- Get Info from the Issue
