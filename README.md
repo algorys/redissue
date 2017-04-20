@@ -6,11 +6,13 @@ Plugin Dokuwiki display issues of Redmine and keep the rights of Redmine too. Re
 * Number, percentage, author of issue
 * Make a link to the choosen issue in Redmine and the related project.
 * Display more or less information depending on your rights.
-* Compatible with [Bootstrap](http://getbootstrap.com/) (need [Bootstrap3 Template](https://github.com/LotarProject/dokuwiki-template-bootstrap3/).
+* Compatible with [Bootstrap](http://getbootstrap.com/) (like with [Dokuwiki Temaplte Bootstrap3](https://github.com/LotarProject/dokuwiki-template-bootstrap3/)).
 
 ## Requirements
 
-Redissue needs [Php-Redmine-API](https://github.com/kbsali/php-redmine-api) to work. Download it inside the ROOT of your redissue's folder or inside ``/usr/share/php`` folder. The second way is better if you use [Redproject](https://www.dokuwiki.org/plugin:redissue) too, as you've just to install API once time.
+Redissue needs [Php-Redmine-API](https://github.com/kbsali/php-redmine-api) to work. Download it inside the ROOT of your redissue's folder or inside ``/usr/share/php`` folder. The last place is better if you use [Redproject](https://www.dokuwiki.org/plugin:redissue) too, as you've just to install API once time.
+
+In any case, Php-Redmine-API must be located inside a `vendor` folder !
 
 ```bash
 mkdir vendor
@@ -21,19 +23,19 @@ cd php-redmine-api
 git checkout v1.5.x
 ```
 
-Don't forget to install the requirements of PhP-Redmine-API :
+Don't forget to install the **requirements** of PhP-Redmine-API :
 
 ```bash
-$ sudo apt-get install php5-curl php5-common
+sudo apt-get install php5-curl php5-common
 ```
 
 ## Install
 
-Download this plugin into your ``${dokuwiki_root}/lib/plugins`` folder and restart dokuwiki.
+Download Redissue plugin into your ``${dokuwiki_root}/lib/plugins`` folder and restart dokuwiki.
 
 ## Configuration
 
-You can configure the plugin in the Config Manager of DokuWiki:
+You can configure Redissue in the Config Manager of DokuWiki:
 
 * redissue.url: Put your Redmine's url server, without a slash ending. Example : ``http://myredmine.com``. This setting can be override by _server_ option.
 * redissue.img: Maybe you have a custom icon for your Redmine installation. You can put image'url here. Example : ``http://www.example.com/image.png``
@@ -43,25 +45,21 @@ You can configure the plugin in the Config Manager of DokuWiki:
   * Impersonate: select this if your wiki's users have the same UID as Redmine's users. e.g. : LDAP authentication. Redissue then will manage rights based on private or public projects.
   * Userview: doesn't manage access rights and display issue even if it's in private project.
 
+Some advanced settings are also available below.
+
 ## Syntax
 
 ### Common options
 
-There is two way to use this plugin:
-
-* First Syntax:
+Common syntax:
 
 `<redissue id='#number_issue' text="text_if_no_rights_or_API" /> `
 
-* Second Syntax:
-
-Only needed if you want to add some additional information. Description of issue is already displayed by Redissue.
-
-`<redissue id='#number_issue' text="text_if_no_rights_or_API" >Additional informations...</redissue>`
+* id: **required** id of the wanted issue.
 
 ### Other options:
 
-* server: override the server url and the API key defined in Redmine **settings**. You must define these in a json file called `server.json`. This file must be at root of redissue folder.
+* server: In case you have multiple server, you can override the server url and the API key defined in the Redissue **settings**. You must define these in a json file called `server.json` (already available in plugin folder). This file must be at root of redissue folder.
 
 Example of _server.json_ file:
 
@@ -80,12 +78,17 @@ Example of _server.json_ file:
 
 Then simply add your server with: `server="first"` in redissue syntax.
 
-**Note:** If server url or key in json file is wrong or if you put a wrong name in "server" parameter(e.g: call _flirt_ instead _first_), redissue take the one who is set in dokuwiki settings. 
+**Note:** If server url or key in json file is wrong or if you put a wrong name in "server" parameter(e.g: call _flirt_ instead _first_), redissue take the one who is set in dokuwiki settings. If **url** or **api_token** are wrong everywhere, an error message will be displayed instead of redissue.
 
-If **url** or **api_token** are wrong everywhere, an error message will be displayed instead of redissue.
-
-* title: you can override title if it's too long or other reason: `title="my title"`.
+* title: you can override issue title if it's too long or for other reasons with: `title="my new title"`.
 * short: (**dokuwiki theme only**, bootstrap not needed this functionnality). If you've dokuwiki theme, you can hide additional information with short: `short="1"`.
+
+If you want to get all issues of a specific project and a specific tracker, it's also possible. You've to add **2** other options:
+
+* project: the **correct** identifier of the project (Available in the settings of redmine project): project="myproject"
+* tracker: the identifier number of your tracker. (You can found this number if you look at the number in the link of a tracker): tracker="3"
+
+Then, Redissue will display all the issue of this tracker for this specific project. If "project" or "tracker" identifiers are bad, Redissue display only issue with Id you have defined in "id" option.
 
 ## Preview
 
