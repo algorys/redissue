@@ -6,7 +6,7 @@ $lang['encoding']   = 'utf-8';
 $lang['direction']  = 'ltr';
 
 $lang['redissue.button'] = 'Ticket Redmine';
-$lang['redissue.text.default'] = 'Issue #%s';
+$lang['redissue.text.default'] = 'Vous n\'avez pas les droits requis pour voir ce ticket !';
 $lang['redissue.project'] = 'Projet';
 $lang['redissue.author'] = 'Auteur';
 $lang['redissue.assigned'] = 'Assignée à';

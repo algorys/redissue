@@ -6,32 +6,14 @@
  */
 
 if (!defined('DOKU_INC')) die();
-require 'vendor/php-redmine-api/lib/autoload.php';
-//require_once "json.php";
+//require 'vendor/php-redmine-api/lib/autoload.php';
+require 'redmine/redmine.php';
 
 class syntax_plugin_redissue extends DokuWiki_Syntax_Plugin {
     const RI_IMPERSONATE = 4;
 
-    function _getImgName() {
-        // If empty (False) get the second part
-        return $this->getConf('redissue.img') ?: 'lib/plugins/redissue/images/redmine.png' ;
-    }
-
     public function getType() {
         return 'substition';
-    }
-    /**
-     * @return string Paragraph type
-     */
-
-    public function getDataFromAlias($server) {
-        $json_file = file_get_contents(__DIR__.'/server.json');
-        $json_data = json_decode($json_file, true);
-        if(isset($json_data[$server])) {
-            return $json_data[$server];
-        } else {
-            return null;
-        }
     }
 
     public function getPType() {
@@ -53,11 +35,20 @@ class syntax_plugin_redissue extends DokuWiki_Syntax_Plugin {
     function postConnect() {
         $this->Lexer->addExitPattern('</redissue>', 'plugin_redissue');
     }
-    // Do the regexp
+
+    function getDataFromAlias($server) {
+        $json_file = file_get_contents(__DIR__.'/server.json');
+        $json_data = json_decode($json_file, true);
+        if(isset($json_data[$server])) {
+            return $json_data[$server];
+        } else {
+            return null;
+        }
+    }
+
     function handle($match, $state, $pos, Doku_Handler $handler) {
         switch($state){
             case DOKU_LEXER_SPECIAL :
-            case DOKU_LEXER_ENTER :
                 $data = array(
                         'state'=>$state,
                         'id'=> 0,
@@ -65,14 +56,21 @@ class syntax_plugin_redissue extends DokuWiki_Syntax_Plugin {
                     );
                 // Redmine Server
                 preg_match("/server *= *(['\"])(.*?)\\1/", $match, $server);
-                $server_url = $this->getConf('redissue.url');
-                if ($server) {
+                //$server_url = $this->getConf('redissue.url');
+                if (count($server) != 0) {
                     $server_data = $this->getDataFromAlias($server[2]);
                     if( ! is_null($server_data)){
                         $data['server_url'] = $server_data['url'];
                         $data['server_token'] = $server_data['api_token'];
                     }
                 }
+                if (!isset($data['server_token'])) {
+                    $data['server_token'] = $this->getConf('redissue.API');
+                }
+                if (!isset($data['server_url'])) {
+                    $data['server_url'] = $this->getConf('redissue.url');
+                }
+                
                 // Issue Id
                 preg_match("/id *= *(['\"])#(\\d+)\\1/", $match, $id);
                 if( count($id) != 0 ) {
@@ -119,143 +117,110 @@ class syntax_plugin_redissue extends DokuWiki_Syntax_Plugin {
         }
     }
 
-    function _render_custom_link($renderer, $data, $issue_id, $subject, $bootstrap) {
-        // Check if user override title.
-        if($data['title']) {
-            $cur_title = $data['title'];
-        }else{
-            $cur_title = '[#'.$issue_id.'] ' . $subject;
+    // Dokuwiki Renderer
+    function render($mode, Doku_Renderer $renderer, $data) {	
+        if($mode != 'xhtml') return false;
+
+        if($data['error']) {
+            $renderer->doc .= $data['text'];
+            return true;
         }
-        if ($bootstrap){
-            $renderer->doc .= '<a title="'.$this->getLang('redissue.link.issue').'" href="' . $this->_getIssueUrl($issue_id, $data) . '"><img src="' . $this->_getImgName($data['img']) . '" class="redissue"/></a>';
-            $renderer->doc .= '<a class="btn btn-primary redissue" role="button" data-toggle="collapse" href="#collapse-'.$issue_id.'" aria-expanded="false" aria-controls="collapse-'.$issue_id.'">';
-            $renderer->doc .= $cur_title;
-            $renderer->doc .= '</a> ';
+        $renderer->info['cache'] = false;
+        switch($data['state']) {
+            case DOKU_LEXER_SPECIAL:
+                $this->renderRedissue($renderer, $data);
+                break;
+            case DOKU_LEXER_EXIT:
+                $renderer->doc .= '</div></div>';
+            case DOKU_LEXER_ENTER:
+            case DOKU_LEXER_UNMATCHED:
+                $renderer->doc .= $renderer->_xmlEntities($data['text']);
+                break;
+        }
+        return true;
+    }
+
+    function renderRedissue($renderer, $data) {
+        $redmine = new DokuwikiRedmine();
+        if(empty($data['server_token'])){
+            $this->renderIssueLink($renderer, $data, $data['id'], $data['text']);
         } else {
-            $renderer->doc .= '<a title="'.$this->getLang('redissue.link.issue').'" href="' . $this->_getIssueUrl($issue_id, $data) . '"><img src="' . $this->_getImgName($data['img']) . '" class="redissue"/>';
-            $renderer->doc .= $cur_title;
-            $renderer->doc .= '</a> ';
-        }
-        if($bootstrap){
-            $renderer->doc .= '<div class="collapse" id="collapse-'.$issue_id.'">';
-        }
-    }
-
-    function _render_default_link($renderer, $data, $bootstrap) {
-        $this->_render_custom_link($renderer, $data, $data['id'], $data['text'], $bootstrap);
-    }
-
-    function _color_prio($client, $id_priority) {
-        $all_prio = $client->api('issue_priority')->all();
-        $normal_prio = 0;
-        // Get the normal index and current index
-        for ($i = 0; $i < count($all_prio['issue_priorities']); $i++) {
-            $current_prio = $all_prio['issue_priorities'][$i];
-            if ($current_prio['is_default'] == 1) {
-                $normal_prio = $i;
-            }                
-            if($current_prio['id'] == $id_priority){
-                $index_prio = $i;
-            }
-        }
-        $min_prio = 0;
-        $low_prio = $normal_prio - 1;
-        $high_prio = $normal_prio + 1;
-        $critical_prio = count($all_prio['issue_priorities']) - 1;
-        if($index_prio == $normal_prio) {
-           $color_prio = 'success'; 
-        }
-        elseif($index_prio == $min_prio) {
-            $color_prio = 'info';
-        }
-        elseif($index_prio < $normal_prio && $index_prio > $min_prio) {
-            $color_prio = 'primary';
-        }
-        elseif($index_prio > $normal_prio && $index_prio < $critical_prio) {
-            $color_prio = 'warning';
-        }
-        else {
-            $color_prio = 'danger';
-        }
-        return $color_prio;
-    }
-    
-    function _project_identifier($client, $project_name) {
-            $project_id = $client->api('project')->getIdByName($project_name);
-            $project = $client->api('project')->show($project_id);
-            $project_identifier = $project['project']['identifier'];
-            return $project_identifier;
-    }
-
-    // Get/ url of redmine issue
-    function _getIssueUrl($id, $data) {
-        return $this->_get_redmine_url($data).'/issues/'.$id;
-    }
-    
-    function _get_redmine_url($data) {
-        $url = $this->getConf('redissue.url');
-        if (isset($data['server_url'])) {
             $url = $data['server_url'];
-        }
-        return $url;
-    }
-
-    // Main render_link
-    function _render_link($renderer, $data) {
-        // Check Bootstrap
-        $bootstrap = False;
-        if ($this->getConf('redissue.theme') == 8){
-            $bootstrap = True;
-        }
-        // Check API_KEY
-        $apiKey = ($this->getConf('redissue.API'));
-        if (isset($data['server_token'])) {
-            $apiKey = $data['server_token'];
-        }
-        if(empty($apiKey)){
-            $this->_render_default_link($renderer, $data, $bootstrap);
-        } else {
-            $url = $this->_get_redmine_url($data);
-            $client = new Redmine\Client($url, $apiKey);
+            $redmine->connect($url, $data['server_token']);
             // Get Id user of the Wiki if Impersonate
-            $view = $this->getConf('redissue.view');
-            if ($view == self::RI_IMPERSONATE) {
-                $redUser = $_SERVER['REMOTE_USER'];;
+            if ($this->getConf('redissue.view') == self::RI_IMPERSONATE) {
+                $redUser = $_SERVER['REMOTE_USER'];
                 // Attempt to collect information with this user
-                $client->setImpersonateUser($redUser);
+                $redmine->client->setImpersonateUser($redUser);
             }
             if(array_key_exists('project_id', $data) && array_key_exists('tracker_id', $data)) {
-                $issues = $client->issue->all([
+                $issues = $redmine->client->issue->all([
                     'project_id' => $data['project_id'],
                     'tracker_id' => $data['tracker_id']
                 ]);
                 if(isset($issues['issues'])) {
                     for ($i = 0; $i < count($issues['issues']); $i++) {
-                        $this->_display_issue($renderer, $data, $bootstrap, $client, $issues['issues'][$i]['id']);
+                        $data['id'] = $issues['issues'][$i]['id'];
+                        $this->displayIssue($renderer, $data, $redmine);
                     }
                 } else {
                     $renderer->doc .= '<p style="color: red;">REDISSUE plugin: "project" ID or "tracker" ID is invalid ! Redissue display single issue instead !</p>';
-                    $this->_display_issue($renderer, $data, $bootstrap, $client, $data['id']);
+                    $this->displayIssue($renderer, $data, $redmine);
                 }
             } else {
-                $this->_display_issue($renderer, $data, $bootstrap, $client, $data['id']);
+                $this->displayIssue($renderer, $data, $redmine);
             }
         }
     }
 
-    function _display_issue($renderer, $data, $bootstrap, $client, $issue_id) {
-        // Issue Id
-        $issue = $client->api('issue')->show($issue_id);
-        $url = $this->_get_redmine_url($data);
+    function isBootstrap() {
+        $bootstrap = False;
+        if ($this->getConf('redissue.theme') == 8){
+            $bootstrap = True;
+        }
+        return $bootstrap; 
+    }
 
-        // If server is wrong
+    function renderIssueLink($renderer, $data, $issue_id, $subject) {
+        // Check if user override title.
+        if($data['title']) {
+            $cur_title = $data['title'];
+        }else{
+            $cur_title = '[#'.$data['id'].'] ' . $subject;
+        }
+        if ($this->isBootstrap()){
+            $renderer->doc .= '<a title="'.$this->getLang('redissue.link.issue').'" href="' . $this->getIssueUrl($data['id'], $data) . '"><img src="' . $this->getImg() . '" class="redissue"/></a>';
+            $renderer->doc .= '<a class="btn btn-primary redissue" role="button" data-toggle="collapse" href="#collapse-'.$data['id'].'" aria-expanded="false" aria-controls="collapse-'.$data['id'].'">';
+            $renderer->doc .= $cur_title;
+            $renderer->doc .= '</a> ';
+            $renderer->doc .= '<div class="collapse" id="collapse-'.$data['id'].'">';
+        } else {
+            $renderer->doc .= '<a title="'.$this->getLang('redissue.link.issue').'" href="' . $this->getIssueUrl($data['id'], $data) . '"><img src="' . $this->getImg() . '" class="redissue"/>';
+            $renderer->doc .= $cur_title;
+            $renderer->doc .= '</a> ';
+        }
+    }
+
+    function getIssueUrl($id, $data) {
+        return $data['server_url'].'/issues/'.$id;
+    }
+    
+    function getImg() {
+        // If empty (False) get the second part
+        return $this->getConf('redissue.img') ?: 'lib/plugins/redissue/images/redmine.png' ;
+    }
+
+    function displayIssue($renderer, $data, $redmine) {
+        $issue = $redmine->getIssue($data['id']);
+        $url = $data['server_url'];
+
         if($issue == 'Syntax error') {
             $renderer->doc .= '<p style="color: red;">REDISSUE plugin: Server exist in JSON config but seems not valid ! Please check your <b>url</b> or your <b>API Key</b> !</p>';
         // If server is good
         } elseif (isset($issue['issue'])) {
             // REDMINE DATA --- Get Info from the Issue
             $project = $issue['issue']['project'];
-            $project_identifier = $this->_project_identifier($client, $project['name']);
+            $project_identifier = $redmine->getProjectIdentifier($project['name']);
             $tracker = $issue['issue']['tracker'];
             $status = $issue['issue']['status']['name'];
             $author = $issue['issue']['author'];
@@ -265,7 +230,8 @@ class syntax_plugin_redissue extends DokuWiki_Syntax_Plugin {
             $done_ratio = $issue['issue']['done_ratio'];
             // RENDERER_MAIN_LINK ---- Get the Id Status
             $myStatusId = $issue['issue']['status']['id'];
-            $statuses = $client->api('issue_status')->all();
+//            $statuses = $redmine->client->api('issue_status')->all();
+            $statuses = $redmine->getStatuses();
             // Browse existing statuses
             for($i = 0; $i < count($statuses['issue_statuses']); $i++) {
                 $foundStatus = $statuses['issue_statuses'][$i];
@@ -277,14 +243,14 @@ class syntax_plugin_redissue extends DokuWiki_Syntax_Plugin {
 
             // RENDERER
             $renderer->doc .= '<p>';
-            $this->_render_custom_link($renderer, $data, $issue_id, $subject, $bootstrap);
+            $this->renderIssueLink($renderer, $data, $issue_id, $subject);
  
             // PRIORITIES --- Get priority and define color
             $priority = $issue['issue']['priority'];
             $id_priority = $priority['id'];
-            $color_prio = $this->_color_prio($client, $id_priority);
+            $color_prio = $redmine->getPriorityColor($id_priority);
             if(!$isClosed){
-                if($bootstrap){
+                if($this->isBootstrap()){
                     $renderer->doc .= ' <span class="label label-success">' . $status . '</span>';
                 }else{
                 $renderer->doc .= ' <span class="badge-prio color-'.$color_prio.'">'.$priority['name'].'</span>';
@@ -292,7 +258,7 @@ class syntax_plugin_redissue extends DokuWiki_Syntax_Plugin {
                     $renderer->doc .= ' <span class="badge-prio open">' . $status . '</span>';
                 }
             } else {
-                if($bootstrap){
+                if($this->isBootstrap()){
                     $renderer->doc .= ' <span class="label label-default">' . $status . '</span>';
                 }else{
                     $renderer->doc .= ' <span class="badge-prio closed">' . $status . '</span>';
@@ -300,7 +266,7 @@ class syntax_plugin_redissue extends DokuWiki_Syntax_Plugin {
             }
             
             // GENERAL_RENDERER --- If all is ok
-            if($bootstrap) {
+            if($this->isBootstrap()) {
                 $renderer->doc .= ' <span class="label label-'.$color_prio.'">'.$priority['name'].'</span>';
                 $renderer->doc .= ' <span class="label label-primary">'. $tracker['name'].'</span>';
                 $renderer->doc .= '<div class="well">';
@@ -319,7 +285,7 @@ class syntax_plugin_redissue extends DokuWiki_Syntax_Plugin {
                 $renderer->doc .= '</span></div>'; // ./progress
                 $renderer->doc .= '</div>'; // ./ well 
                 $renderer->doc .= '</div>';
-            }else{ //Not Bootstrap
+            } else {
                 $renderer->doc .= '<div ';
                 if($data['short'] > 0) {
                     $renderer->doc .= 'style="display:none;"';
@@ -346,35 +312,8 @@ class syntax_plugin_redissue extends DokuWiki_Syntax_Plugin {
             $renderer->doc .= '</p>';
         } else {
             // If the user has no Rights
-            $this->_render_default_link($renderer, $data, $boostrap);
-            if ($data['state'] == DOKU_LEXER_SPECIAL OR $data['state'] == DOKU_LEXER_ENTER){
-                $renderer->doc .= '<div><div class="norights">';
-            }
+            $this->renderIssueLink($renderer, $data, $data['id'], $data['text']);
         }
     }
 
-    // Dokuwiki Renderer
-    function render($mode, Doku_Renderer $renderer, $data) {	
-        if($mode != 'xhtml') return false;
-
-        if($data['error']) {
-            $renderer->doc .= $data['text'];
-            return true;
-        }
-        $renderer->info['cache'] = false;
-        switch($data['state']) {
-            case DOKU_LEXER_SPECIAL :
-                $this->_render_link($renderer, $data);
-                break;
-            case DOKU_LEXER_ENTER :
-                $this->_render_link($renderer, $data);
-                break;
-            case DOKU_LEXER_EXIT:
-                $renderer->doc .= '</div></div>';
-            case DOKU_LEXER_UNMATCHED :
-                $renderer->doc .= $renderer->_xmlEntities($data['text']);
-                break;
-        }
-        return true;
-    }
 }
