@@ -186,7 +186,11 @@ class syntax_plugin_redissue extends DokuWiki_Syntax_Plugin {
             $cur_title = $data['text'];
             $collapse = '';
         else:
-            $cur_title = '[#'.$data['id'].'] ' . $data['text'];
+            if (isset($data['title'])) {
+                $cur_title = '[#'.$data['id'].'] ' . $data['title'];
+            } else {
+                $cur_title = '[#'.$data['id'].'] ' . $data['text'];
+            }
             $collapse = 'collapse';
         endif;
         // Render Link
