@@ -51,11 +51,34 @@ Some advanced settings are also available below.
 
 ### Common options
 
-Common syntax:
+Single issue syntax:
 
-`<redissue id='#number_issue' text="text_if_no_rights_or_API" /> `
+`<redissue id="#number_issue" text="text_if_no_rights_or_API" /> `
 
-* id: **required** id of the wanted issue.
+* id: id of the wanted issue.
+* text: displays a text other than the default if the user does not have the rights or the issue does not exist
+
+Multiple issue synax
+
+If you want to get all issues of a specific project and/or a specific tracker, it's also possible. You've **2** other options:
+
+* project: the **right** identifier of the project (Available in the settings of redmine project): project="myproject"
+* tracker: the identifier number of your tracker. (You can found this number if you look at the number in the link of a tracker): tracker="3"
+
+In this case, the twice parameter **must be set** but one can be empty. E.g: if you want to have all issues of a project for all trackers, you can leave tracker empty
+
+* limit: set the limit of issues displayed. Default is 25.
+
+Examples:
+
+```php
+// Display the first 25 issues with tracker 1 for project "myproject"
+<redissue project="myproject" tracker="1" />
+// Display the first 25 issues for project "myproject"
+<redissue project="myproject" tracker="" />
+// Display the first 50 issues with tracker 4 for all projects (if you have rights)
+<redissue project="" tracker="4" limit="50" />
+```
 
 ### Other options:
 
@@ -82,11 +105,6 @@ Then simply add your server with: `server="first"` in redissue syntax.
 
 * title: you can override issue title if it's too long or for other reasons with: `title="my new title"`.
 * short: (**dokuwiki theme only**, bootstrap not needed this functionnality). If you've dokuwiki theme, you can hide additional information with short: `short="1"`.
-
-If you want to get all issues of a specific project and a specific tracker, it's also possible. You've to add **2** other options:
-
-* project: the **correct** identifier of the project (Available in the settings of redmine project): project="myproject"
-* tracker: the identifier number of your tracker. (You can found this number if you look at the number in the link of a tracker): tracker="3"
 
 Then, Redissue will display all the issue of this tracker for this specific project. If "project" or "tracker" identifiers are bad, Redissue display only issue with Id you have defined in "id" option.
 
