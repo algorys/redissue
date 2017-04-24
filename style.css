@@ -72,6 +72,9 @@ div.border-info {
 div.border-danger {
     border-left-color: #f04124;
 }
+div.issue-desc {
+    margin-top: 0.5em !important;
+}
 
 span.open {
     color: #f0f0f0;
@@ -105,7 +108,7 @@ span.color-danger {
 }
 
 span.badge-prio {
-    padding: 0.2em;
+    padding: 0.3em;
 }
 span.tracker {
     color: #f0f0f0;

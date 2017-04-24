@@ -302,9 +302,9 @@ class syntax_plugin_redissue extends DokuWiki_Syntax_Plugin {
                     $renderer->doc .= '<span><b> '.$this->getLang('redissue.closed').' : </b>';
                     $renderer->doc .= ''.$dates_times['closed']['date'].' ('.$dates_times['closed']['time'].')</span>';
                 }
-                $renderer->doc .= '</span></div>'; // ./ Issue-info
-                $renderer->doc .= '<div class="issue-description">';
-                $renderer->doc .= '<h4>'.$this->getLang('redissue.desc').' :</h4>';
+                $renderer->doc .= '</div>'; // ./ Issue-info
+                $renderer->doc .= '<div class="issue-desc">';
+                $renderer->doc .= '<b>'.$this->getLang('redissue.desc').' :</b>';
                 $renderer->doc .= '<p>'.$description.'</p>';
                 $renderer->doc .= '</div>';
                 $renderer->doc .= '<div class="progress">';
