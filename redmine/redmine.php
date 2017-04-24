@@ -63,6 +63,15 @@ class DokuwikiRedmine {
         }
         return $color_prio;
     }
-
+ 
+    function getIsClosedValue($statusId){
+        $statuses = $this->getStatuses();
+        for($i = 0; $i < count($statuses['issue_statuses']); $i++) {
+            if($statuses['issue_statuses'][$i]['id'] == $statusId) {
+                $isClosed = $statuses['issue_statuses'][$i]['is_closed'];
+            }
+        }
+        return $isClosed;
+    }
 }
 

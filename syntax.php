@@ -143,7 +143,7 @@ class syntax_plugin_redissue extends DokuWiki_Syntax_Plugin {
     function renderRedissue($renderer, $data) {
         $redmine = new DokuwikiRedmine();
         if(empty($data['server_token'])){
-            $this->renderIssueLink($renderer, $data, $data['id'], $data['text']);
+            $this->renderIssueLink($renderer, $data, $data['text']);
         } else {
             $url = $data['server_url'];
             $redmine->connect($url, $data['server_token']);
@@ -181,7 +181,7 @@ class syntax_plugin_redissue extends DokuWiki_Syntax_Plugin {
         return $bootstrap; 
     }
 
-    function renderIssueLink($renderer, $data, $issue_id, $subject) {
+    function renderIssueLink($renderer, $data, $subject) {
         // Check if user override title.
         if($data['title']) {
             $cur_title = $data['title'];
@@ -216,9 +216,9 @@ class syntax_plugin_redissue extends DokuWiki_Syntax_Plugin {
 
         if($issue == 'Syntax error') {
             $renderer->doc .= '<p style="color: red;">REDISSUE plugin: Server exist in JSON config but seems not valid ! Please check your <b>url</b> or your <b>API Key</b> !</p>';
-        // If server is good
+        // If rights
         } elseif (isset($issue['issue'])) {
-            // REDMINE DATA --- Get Info from the Issue
+            // ISSUE INFOS
             $project = $issue['issue']['project'];
             $project_identifier = $redmine->getProjectIdentifier($project['name']);
             $tracker = $issue['issue']['tracker'];
@@ -228,27 +228,14 @@ class syntax_plugin_redissue extends DokuWiki_Syntax_Plugin {
             $subject = $issue['issue']['subject'];
             $description = $issue['issue']['description'];
             $done_ratio = $issue['issue']['done_ratio'];
-            // RENDERER_MAIN_LINK ---- Get the Id Status
-            $myStatusId = $issue['issue']['status']['id'];
-//            $statuses = $redmine->client->api('issue_status')->all();
-            $statuses = $redmine->getStatuses();
-            // Browse existing statuses
-            for($i = 0; $i < count($statuses['issue_statuses']); $i++) {
-                $foundStatus = $statuses['issue_statuses'][$i];
-                if($foundStatus['id'] == $myStatusId) {
-                    // Get is_closed value
-                    $isClosed = $foundStatus['is_closed'];
-                }
-            }
-
-            // RENDERER
+            // RENDER ISSUE LINK
+            $isClosed = $redmine->getIsClosedValue($issue['issue']['status']['id']);
             $renderer->doc .= '<p>';
-            $this->renderIssueLink($renderer, $data, $issue_id, $subject);
+            $this->renderIssueLink($renderer, $data, $subject);
  
-            // PRIORITIES --- Get priority and define color
+            // GENERAL RENDERER 
             $priority = $issue['issue']['priority'];
-            $id_priority = $priority['id'];
-            $color_prio = $redmine->getPriorityColor($id_priority);
+            $color_prio = $redmine->getPriorityColor($priority['id']);
             if(!$isClosed){
                 if($this->isBootstrap()){
                     $renderer->doc .= ' <span class="label label-success">' . $status . '</span>';
@@ -265,7 +252,6 @@ class syntax_plugin_redissue extends DokuWiki_Syntax_Plugin {
                 }
             }
             
-            // GENERAL_RENDERER --- If all is ok
             if($this->isBootstrap()) {
                 $renderer->doc .= ' <span class="label label-'.$color_prio.'">'.$priority['name'].'</span>';
                 $renderer->doc .= ' <span class="label label-primary">'. $tracker['name'].'</span>';
@@ -312,7 +298,7 @@ class syntax_plugin_redissue extends DokuWiki_Syntax_Plugin {
             $renderer->doc .= '</p>';
         } else {
             // If the user has no Rights
-            $this->renderIssueLink($renderer, $data, $data['id'], $data['text']);
+            $this->renderIssueLink($renderer, $data, $data['text']);
         }
     }
 
