@@ -33,7 +33,7 @@ class syntax_plugin_redissue extends DokuWiki_Syntax_Plugin {
         $this->Lexer->addExitPattern('</redissue>', 'plugin_redissue');
     }
 
-    function getDataFromAlias($server) {
+    function getServerFromJson($server) {
         $json_file = file_get_contents(__DIR__.'/server.json');
         $json_data = json_decode($json_file, true);
         if(isset($json_data[$server])) {
@@ -53,9 +53,8 @@ class syntax_plugin_redissue extends DokuWiki_Syntax_Plugin {
                     );
                 // Redmine Server
                 preg_match("/server *= *(['\"])(.*?)\\1/", $match, $server);
-                //$server_url = $this->getConf('redissue.url');
                 if (count($server) != 0) {
-                    $server_data = $this->getDataFromAlias($server[2]);
+                    $server_data = $this->getServerFromJson($server[2]);
                     if( ! is_null($server_data)){
                         $data['server_url'] = $server_data['url'];
                         $data['server_token'] = $server_data['api_token'];
@@ -70,15 +69,12 @@ class syntax_plugin_redissue extends DokuWiki_Syntax_Plugin {
                 
                 // Issue Id
                 preg_match("/id *= *(['\"])#(\\d+)\\1/", $match, $id);
-                if( count($id) != 0 ) {
+                if ((count($id) != 0) && ($id[2] != 0)) {
                     $data['id'] = $id[2];
                 } else {
-                    return array(
-                            'state'=>$state,
-                            'error'=>true,
-                            'text'=>'<p style="color: red;">REDISSUE plugin: option "id" must be filled ! </p>',
-                        );
+                    $data['id'] = 0;
                 }
+ 
                 // Title
                 preg_match("/title *= *(['\"])(.*?)\\1/", $match, $title);
                 if( count($title) != 0 ) {
@@ -105,6 +101,14 @@ class syntax_plugin_redissue extends DokuWiki_Syntax_Plugin {
                 if( count($tracker) != 0 ) {
                     $data['tracker_id'] = $tracker[2];
                 }
+                // Limit
+                preg_match("/limit *= *(['\"])(\\d+)\\1/", $match, $limit);
+                if( count($limit) != 0 ) {
+                    $data['limit'] = $limit[2];
+                } else {
+                    $data['limit'] = 25;
+                }
+
 
                 return $data;
             case DOKU_LEXER_UNMATCHED :
