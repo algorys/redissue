@@ -6,12 +6,9 @@
  */
 
 if (!defined('DOKU_INC')) die();
-//require 'vendor/php-redmine-api/lib/autoload.php';
 require 'redmine/redmine.php';
 
 class syntax_plugin_redissue extends DokuWiki_Syntax_Plugin {
-    const RI_IMPERSONATE = 4;
-
     public function getType() {
         return 'substition';
     }
@@ -143,20 +140,18 @@ class syntax_plugin_redissue extends DokuWiki_Syntax_Plugin {
     function renderRedissue($renderer, $data) {
         $redmine = new DokuwikiRedmine();
         if(empty($data['server_token'])){
-            $this->renderIssueLink($renderer, $data, $data['text']);
+            $this->renderIssueLink($renderer, $data);
         } else {
             $url = $data['server_url'];
-            $redmine->connect($url, $data['server_token']);
-            // Get Id user of the Wiki if Impersonate
-            if ($this->getConf('redissue.view') == self::RI_IMPERSONATE) {
-                $redUser = $_SERVER['REMOTE_USER'];
-                // Attempt to collect information with this user
-                $redmine->client->setImpersonateUser($redUser);
-            }
+            $view = $this->getConf('redissue.view');
+            $wiki_user = $_SERVER['REMOTE_USER'];
+            $redmine->connect($url, $data['server_token'], $view, $wiki_user);
+
             if(array_key_exists('project_id', $data) && array_key_exists('tracker_id', $data)) {
                 $issues = $redmine->client->issue->all([
                     'project_id' => $data['project_id'],
-                    'tracker_id' => $data['tracker_id']
+                    'tracker_id' => $data['tracker_id'],
+                    'limit' => $data['limit']
                 ]);
                 if(isset($issues['issues'])) {
                     for ($i = 0; $i < count($issues['issues']); $i++) {
@@ -164,7 +159,7 @@ class syntax_plugin_redissue extends DokuWiki_Syntax_Plugin {
                         $this->displayIssue($renderer, $data, $redmine);
                     }
                 } else {
-                    $renderer->doc .= '<p style="color: red;">REDISSUE plugin: "project" ID or "tracker" ID is invalid ! Redissue display single issue instead !</p>';
+                    $renderer->doc .= '<p style="color: red;">REDISSUE plugin: "project" ID or "tracker" ID is invalid ! Redissue try to display single issue instead !</p>';
                     $this->displayIssue($renderer, $data, $redmine);
                 }
             } else {
@@ -181,16 +176,19 @@ class syntax_plugin_redissue extends DokuWiki_Syntax_Plugin {
         return $bootstrap; 
     }
 
-    function renderIssueLink($renderer, $data, $subject) {
-        // Check if user override title.
-        if($data['title']) {
-            $cur_title = $data['title'];
-        }else{
-            $cur_title = '[#'.$data['id'].'] ' . $subject;
-        }
+    function renderIssueLink($renderer, $data) {
+        // Check if issue or not
+        if ($data['id'] == 0):
+            $cur_title = $data['text'];
+            $collapse = '';
+        else:
+            $cur_title = '[#'.$data['id'].'] ' . $data['text'];
+            $collapse = 'collapse';
+        endif;
+        // Render Link
         if ($this->isBootstrap()){
             $renderer->doc .= '<a title="'.$this->getLang('redissue.link.issue').'" href="' . $this->getIssueUrl($data['id'], $data) . '"><img src="' . $this->getImg() . '" class="redissue"/></a>';
-            $renderer->doc .= '<a class="btn btn-primary redissue" role="button" data-toggle="collapse" href="#collapse-'.$data['id'].'" aria-expanded="false" aria-controls="collapse-'.$data['id'].'">';
+            $renderer->doc .= '<a class="btn btn-primary redissue" role="button" data-toggle="'.$collapse.'" href="#collapse-'.$data['id'].'" aria-expanded="false" aria-controls="collapse-'.$data['id'].'">';
             $renderer->doc .= $cur_title;
             $renderer->doc .= '</a> ';
             $renderer->doc .= '<div class="collapse" id="collapse-'.$data['id'].'">';
@@ -231,7 +229,8 @@ class syntax_plugin_redissue extends DokuWiki_Syntax_Plugin {
             // RENDER ISSUE LINK
             $isClosed = $redmine->getIsClosedValue($issue['issue']['status']['id']);
             $renderer->doc .= '<p>';
-            $this->renderIssueLink($renderer, $data, $subject);
+            $data['text'] = $issue['issue']['subject'];
+            $this->renderIssueLink($renderer, $data);
  
             // GENERAL RENDERER 
             $priority = $issue['issue']['priority'];
@@ -315,7 +314,7 @@ class syntax_plugin_redissue extends DokuWiki_Syntax_Plugin {
             $renderer->doc .= '</p>';
         } else {
             // If the user has no Rights
-            $this->renderIssueLink($renderer, $data, $data['text']);
+            $this->renderIssueLink($renderer, $data);
         }
     }
 

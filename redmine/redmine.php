@@ -9,10 +9,15 @@ if (!defined('DOKU_INC')) die();
 require 'vendor/php-redmine-api/lib/autoload.php';
 
 class DokuwikiRedmine {
+    const RI_IMPERSONATE = 4;
     public $client;
 
-    function connect($url, $apiKey){
+    function connect($url, $apiKey, $impersonate, $user){
         $this->client = new Redmine\Client($url, $apiKey);
+        if ($impersonate == self::RI_IMPERSONATE) {
+            $this->client->setImpersonateUser($user);
+        }
+
     }
 
     function getProjectIdentifier($project_name) {
