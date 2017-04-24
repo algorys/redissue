@@ -10,6 +10,9 @@ $lang['redissue.text.default'] = 'You do not have the required rights to view th
 $lang['redissue.project'] = 'Project';
 $lang['redissue.author'] = 'Author';
 $lang['redissue.assigned'] = 'Assigned to';
+$lang['redissue.created'] = 'Created';
+$lang['redissue.updated'] = 'Updated';
+$lang['redissue.closed'] = 'Closed';
 $lang['redissue.desc'] = 'Description';
 $lang['redissue.link.issue'] = 'See in Redmine';
 

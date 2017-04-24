@@ -260,20 +260,20 @@ class syntax_plugin_redissue extends DokuWiki_Syntax_Plugin {
                 $renderer->doc .= '<div class="issue-info"><dl class="dl-horizontal">';
                 $renderer->doc .= '<dt><icon class="glyphicon glyphicon-info-sign">&nbsp;</icon>Projet :</dt>';
                 $renderer->doc .= '<dd><a href="'.$url.'/projects/'.$project_identifier.'">'.$project['name'].'</a></dd>';
-                $renderer->doc .= '<dt>Auteur :</dt>';
+                $renderer->doc .= '<dt>'.$this->getLang('redissue.author').' :</dt>';
                 $renderer->doc .= '<dd>'.$author['name'].' </dd>';
-                $renderer->doc .= '<dt>Assigné à :</dt>';
+                $renderer->doc .= '<dt>'.$this->getLang('redissue.assigned').' :</dt>';
                 $renderer->doc .= '<dd>'.$assigned['name'].' </dd>';
-                $renderer->doc .= '<dt>Créé :</dt>';
+                $renderer->doc .= '<dt>'.$this->getLang('redissue.created').' :</dt>';
                 $renderer->doc .= '<dd>'.$dates_times['created']['date'].' ('.$dates_times['created']['time'].')</dd>';
-                $renderer->doc .= '<dt>Mis à jour :</dt>';
+                $renderer->doc .= '<dt>'.$this->getLang('redissue.updated').' :</dt>';
                 $renderer->doc .= '<dd>'.$dates_times['updated']['date'].' ('.$dates_times['updated']['time'].')</dd>';
                 if ($dates_times['closed']){
-                    $renderer->doc .= '<dt>Fermée :</dt>';
+                    $renderer->doc .= '<dt>'.$this->getLang('redissue.closed').' :</dt>';
                     $renderer->doc .= '<dd>'.$dates_times['closed']['date'].' ('.$dates_times['closed']['time'].')</dd>';
                 }
                 $renderer->doc .= '</dl></div>'; // ./ Issue-info
-                $renderer->doc .= '<h4>Description</h4><p>'.$description.'</p>';
+                $renderer->doc .= '<h4>'.$this->getLang('redissue.desc').'</h4><p>'.$description.'</p>';
                 $renderer->doc .= '<div class="progress">';
                 $renderer->doc .= '<span class="progress-bar" role="progressbar" aria-valuenow="70" aria-valuemin="0" aria-valuemax="100" style="width:'.$done_ratio.'%">';
                 $renderer->doc .= '<span class="doku">'.$done_ratio.'% Complete</span>';
@@ -287,13 +287,21 @@ class syntax_plugin_redissue extends DokuWiki_Syntax_Plugin {
                 }
                 $renderer->doc .= 'class="issue-doku border-'.$color_prio.'">';
                 $renderer->doc .= '<div>';
-                $renderer->doc .= '<span><b>'.$this->getLang('redissue.project').' : </b></span>';
-                $renderer->doc .= '<a href="'.$url.'/projects/'.$project_identifier.'"> '.$project['name'].'</a>';
-                $renderer->doc .= '<span><b> '.$this->getLang('redissue.author').' : </b></span>';
-                $renderer->doc .= ''.$author['name'].'';
+                $renderer->doc .= '<span><b>'.$this->getLang('redissue.project').' : </b>';
+                $renderer->doc .= '<a href="'.$url.'/projects/'.$project_identifier.'"> '.$project['name'].'</a></span>';
+                $renderer->doc .= '<span><b> '.$this->getLang('redissue.author').' : </b>';
+                $renderer->doc .= ''.$author['name'].'</span>';
                 $renderer->doc .= '<br>';
-                $renderer->doc .= '<span><b> '.$this->getLang('redissue.assigned').' :</b></span>';
-                $renderer->doc .= '<a> '.$assigned['name'].' </a>';
+                $renderer->doc .= '<span><b> '.$this->getLang('redissue.assigned').' :</b>';
+                $renderer->doc .= '<a> '.$assigned['name'].' </a></span><br>';
+                $renderer->doc .= '<span><b> '.$this->getLang('redissue.created').' : </b>';
+                $renderer->doc .= ''.$dates_times['created']['date'].' ('.$dates_times['created']['time'].')</span>';
+                $renderer->doc .= '<span><b> '.$this->getLang('redissue.updated').' : </b>';
+                $renderer->doc .= ''.$dates_times['updated']['date'].' ('.$dates_times['updated']['time'].')</span>';
+                if ($dates_times['closed']){
+                    $renderer->doc .= '<span><b> '.$this->getLang('redissue.closed').' : </b>';
+                    $renderer->doc .= ''.$dates_times['closed']['date'].' ('.$dates_times['closed']['time'].')</span>';
+                }
                 $renderer->doc .= '</span></div>'; // ./ Issue-info
                 $renderer->doc .= '<div class="issue-description">';
                 $renderer->doc .= '<h4>'.$this->getLang('redissue.desc').' :</h4>';
