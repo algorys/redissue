@@ -29,6 +29,29 @@ class DokuwikiRedmine {
         return $this->client->issue_status->all();
     }
 
+    function getDateAndTime($dateTime){
+        $dateTimeExploded = explode('T', $dateTime);
+        $timeExploded = explode('Z', $dateTimeExploded[1]);
+        return ['date' => $dateTimeExploded[0], 'time' => $timeExploded[0]];
+    }
+
+    function getDatesTimesIssue($issue){
+        $created = $issue['issue']['created_on'];
+        $updated = $issue['issue']['updated_on'];
+        $closed = $issue['issue']['closed_on'];
+        if($closed){
+            $closedTime = $this->getDateAndTime($closed);
+        } else {
+            $closedTime = $closed;
+        }
+        $dates_times = [
+            'created' => $this->getDateAndTime($created),
+            'updated' => $this->getDateAndTime($updated),
+            'closed' => $closedTime,   
+        ];
+        return $dates_times;
+    }
+
     function getPriorityColor($id_priority) {
         $all_prio = $this->client->api('issue_priority')->all();
         $normal_prio = 0;

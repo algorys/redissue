@@ -236,6 +236,7 @@ class syntax_plugin_redissue extends DokuWiki_Syntax_Plugin {
             // GENERAL RENDERER 
             $priority = $issue['issue']['priority'];
             $color_prio = $redmine->getPriorityColor($priority['id']);
+            $dates_times = $redmine->getDatesTimesIssue($issue);
             if(!$isClosed){
                 if($this->isBootstrap()){
                     $renderer->doc .= ' <span class="label label-success">' . $status . '</span>';
@@ -263,6 +264,14 @@ class syntax_plugin_redissue extends DokuWiki_Syntax_Plugin {
                 $renderer->doc .= '<dd>'.$author['name'].' </dd>';
                 $renderer->doc .= '<dt>Assigné à :</dt>';
                 $renderer->doc .= '<dd>'.$assigned['name'].' </dd>';
+                $renderer->doc .= '<dt>Créé :</dt>';
+                $renderer->doc .= '<dd>'.$dates_times['created']['date'].' ('.$dates_times['created']['time'].')</dd>';
+                $renderer->doc .= '<dt>Mis à jour :</dt>';
+                $renderer->doc .= '<dd>'.$dates_times['updated']['date'].' ('.$dates_times['updated']['time'].')</dd>';
+                if ($dates_times['closed']){
+                    $renderer->doc .= '<dt>Fermée :</dt>';
+                    $renderer->doc .= '<dd>'.$dates_times['closed']['date'].' ('.$dates_times['closed']['time'].')</dd>';
+                }
                 $renderer->doc .= '</dl></div>'; // ./ Issue-info
                 $renderer->doc .= '<h4>Description</h4><p>'.$description.'</p>';
                 $renderer->doc .= '<div class="progress">';
