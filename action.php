@@ -22,10 +22,12 @@ class action_plugin_redissue extends DokuWiki_Action_Plugin {
     public function insert_button(Doku_Event $event, $param) {
         $event->data[] = array (
             'type' => 'format',
-            'title' => $this->getLang('redissue.button'),
+            //'title' => $this->getLang('redissue.button'),
+            'title' => 'issue_NB',
             'icon' => '../../plugins/redissue/images/redmine.png',
-            'open' => ' <redissue id="#issue" text="text_display_if_no_rights">',
-            'close' => '</redissue>',
+            'open' => ' <redissue id="#',
+            'close' => '" />',
+            'sample' => 'ISSUE_NB',
         );
     } // insert_button
 }
