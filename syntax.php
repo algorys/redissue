@@ -110,7 +110,6 @@ class syntax_plugin_redissue extends DokuWiki_Syntax_Plugin {
                 }
                 // Sort
                 preg_match("/sort *= *(['\"])(.*?)\\1/", $match, $sort);
-                print_r($sort);
                 if( count($sort) != 0 ) {
                     $data['sort'] = $sort[2];
                 } else {
@@ -182,11 +181,12 @@ class syntax_plugin_redissue extends DokuWiki_Syntax_Plugin {
     }
 
     function isBootstrap() {
-        $bootstrap = False;
-        if ($this->getConf('redissue.theme') == 8){
-            $bootstrap = True;
+        global $conf;
+        if ($conf['template'] == 'bootstrap3'){
+            return True;
+        } else {
+            return False;
         }
-        return $bootstrap; 
     }
 
     function renderIssueLink($renderer, $data) {
