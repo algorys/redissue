@@ -22,8 +22,7 @@ class action_plugin_redissue extends DokuWiki_Action_Plugin {
     public function insert_button(Doku_Event $event, $param) {
         $event->data[] = array (
             'type' => 'format',
-            //'title' => $this->getLang('redissue.button'),
-            'title' => 'issue_NB',
+            'title' => $this->getLang('redissue.button'),
             'icon' => '../../plugins/redissue/images/redmine.png',
             'open' => ' <redissue id="#',
             'close' => '" />',
