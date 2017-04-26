@@ -22,11 +22,13 @@ class action_plugin_redissue extends DokuWiki_Action_Plugin {
     public function insert_button(Doku_Event $event, $param) {
         $syntax = array (
             'Single Issue'   => array(
+                'icon' => '../../plugins/redissue/images/issue_single.png',
                 'open'   => '<redissue id="',
                 'close'  => '" />',
                 'sample' => 'ISSUE_ID'
             ),
             'Multiple Issue' => array(
+                'icon' => '../../plugins/redissue/images/issue_multiple.png',
                 'open'   => '<redissue project="PROJECT_ID" tracker="',
                 'close'  => '" />',
                 'sample' => 'TRACKER_ID'
@@ -44,7 +46,7 @@ class action_plugin_redissue extends DokuWiki_Action_Plugin {
             $redissue['list'] [] = array(
                 'type' => 'format',
                 'title' => $syntax_name,
-                'icon' => '../../plugins/redissue/images/redmine.png',
+                'icon' => $syntax_data['icon'],
                 'open' => $syntax_data['open'],
                 'close' => $syntax_data['close'],
                 'sample' => $syntax_data['sample'],
