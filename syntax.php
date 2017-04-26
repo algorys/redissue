@@ -108,7 +108,14 @@ class syntax_plugin_redissue extends DokuWiki_Syntax_Plugin {
                 } else {
                     $data['limit'] = 25;
                 }
-
+                // Sort
+                preg_match("/sort *= *(['\"])(.*?)\\1/", $match, $sort);
+                print_r($sort);
+                if( count($sort) != 0 ) {
+                    $data['sort'] = $sort[2];
+                } else {
+                    $data['sort'] = '';
+                }
 
                 return $data;
             case DOKU_LEXER_UNMATCHED :
@@ -152,10 +159,12 @@ class syntax_plugin_redissue extends DokuWiki_Syntax_Plugin {
             $redmine->connect($url, $data['server_token'], $view, $wiki_user);
 
             if(array_key_exists('project_id', $data) && array_key_exists('tracker_id', $data)) {
+                print_r($data['sort']);
                 $issues = $redmine->client->issue->all([
                     'project_id' => $data['project_id'],
                     'tracker_id' => $data['tracker_id'],
-                    'limit' => $data['limit']
+                    'limit' => $data['limit'],
+                    'sort' => $data['sort']
                 ]);
                 if(isset($issues['issues'])) {
                     for ($i = 0; $i < count($issues['issues']); $i++) {
