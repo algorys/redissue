@@ -156,9 +156,7 @@ class syntax_plugin_redissue extends DokuWiki_Syntax_Plugin {
             $view = $this->getConf('redissue.view');
             $wiki_user = $_SERVER['REMOTE_USER'];
             $redmine->connect($url, $data['server_token'], $view, $wiki_user);
-
             if(array_key_exists('project_id', $data) && array_key_exists('tracker_id', $data)) {
-                print_r($data['sort']);
                 $issues = $redmine->client->issue->all([
                     'project_id' => $data['project_id'],
                     'tracker_id' => $data['tracker_id'],
@@ -239,7 +237,9 @@ class syntax_plugin_redissue extends DokuWiki_Syntax_Plugin {
             $tracker = $issue['issue']['tracker'];
             $status = $issue['issue']['status']['name'];
             $author = $issue['issue']['author'];
+            $author_id = $redmine->getIdByUsername($author['name']);
             $assigned = $issue['issue']['assigned_to'];
+            $assigned_id = $redmine->getIdByUsername($assigned['name']);
             $subject = $issue['issue']['subject'];
             $description = $issue['issue']['description'];
             $done_ratio = $issue['issue']['done_ratio'];
@@ -277,9 +277,9 @@ class syntax_plugin_redissue extends DokuWiki_Syntax_Plugin {
                 $renderer->doc .= '<dt><icon class="glyphicon glyphicon-info-sign">&nbsp;</icon>Projet :</dt>';
                 $renderer->doc .= '<dd><a href="'.$url.'/projects/'.$project_identifier.'">'.$project['name'].'</a></dd>';
                 $renderer->doc .= '<dt>'.$this->getLang('redissue.author').' :</dt>';
-                $renderer->doc .= '<dd>'.$author['name'].' </dd>';
+                $renderer->doc .= '<dd><a href="'.$url.'/users/'.$author_id.'">'.$author['name'].'</a></dd>';
                 $renderer->doc .= '<dt>'.$this->getLang('redissue.assigned').' :</dt>';
-                $renderer->doc .= '<dd>'.$assigned['name'].' </dd>';
+                $renderer->doc .= '<dd><a href="'.$url.'/users/'.$assigned_id.'">'.$assigned['name'].'</a></dd>';
                 $renderer->doc .= '<dt>'.$this->getLang('redissue.created').' :</dt>';
                 $renderer->doc .= '<dd>'.$dates_times['created']['date'].' ('.$dates_times['created']['time'].')</dd>';
                 $renderer->doc .= '<dt>'.$this->getLang('redissue.updated').' :</dt>';
@@ -306,10 +306,10 @@ class syntax_plugin_redissue extends DokuWiki_Syntax_Plugin {
                 $renderer->doc .= '<span><b>'.$this->getLang('redissue.project').' : </b>';
                 $renderer->doc .= '<a href="'.$url.'/projects/'.$project_identifier.'"> '.$project['name'].'</a></span>';
                 $renderer->doc .= '<span><b> '.$this->getLang('redissue.author').' : </b>';
-                $renderer->doc .= ''.$author['name'].'</span>';
+                $renderer->doc .= '<a href="'.$url.'/users/'.$author_id.'">'.$author['name'].'</a></span>';
                 $renderer->doc .= '<br>';
                 $renderer->doc .= '<span><b> '.$this->getLang('redissue.assigned').' :</b>';
-                $renderer->doc .= '<a> '.$assigned['name'].' </a></span><br>';
+                $renderer->doc .= '<a href="'.$url.'/users/'.$assigned_id.'"> '.$assigned['name'].' </a></span><br>';
                 $renderer->doc .= '<span><b> '.$this->getLang('redissue.created').' : </b>';
                 $renderer->doc .= ''.$dates_times['created']['date'].' ('.$dates_times['created']['time'].')</span>';
                 $renderer->doc .= '<span><b> '.$this->getLang('redissue.updated').' : </b>';

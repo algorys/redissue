@@ -34,6 +34,16 @@ class DokuwikiRedmine {
         return $this->client->issue_status->all();
     }
 
+    function getIdByUsername($username){
+        $all_users = $this->client->user->all(['limit' => '500']);
+        for ($i = 0; $i < count($all_users['users']); $i++) {
+            $cur_name = $all_users['users'][$i]['firstname'] . ' ' . $all_users['users'][$i]['lastname'];
+            $pos = strpos($cur_name, $username);
+            if ($pos !== false)
+                return $all_users['users'][$i]['id'];
+        }
+        return null;
+    }
     function getDateAndTime($dateTime){
         $dateTimeExploded = explode('T', $dateTime);
         $timeExploded = explode('Z', $dateTimeExploded[1]);
