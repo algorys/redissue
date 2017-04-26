@@ -51,12 +51,14 @@ Some advanced settings are also available below.
 
 ### Single issue syntax:
 
-`<redissue id="#number_issue" text="text_if_no_rights_or_API" /> `
+```php
+<redissue id="#number_issue" text="text_if_no_rights_or_API" />
+```
 
 * id: id of the wanted issue.
 * text: displays a text other than the default if the user does not have the rights or the issue does not exist
 
-### Multiple issue synax
+### Multiple issue syntax
 
 If you want to get all issues of a specific project and/or a specific tracker, it's also possible. You've **2** other options:
 
