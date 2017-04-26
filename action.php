@@ -20,13 +20,37 @@ class action_plugin_redissue extends DokuWiki_Action_Plugin {
      * Inserts the toolbar button
      */
     public function insert_button(Doku_Event $event, $param) {
-        $event->data[] = array (
-            'type' => 'format',
+        $syntax = array (
+            'Single Issue'   => array(
+                'open'   => '<redissue id="',
+                'close'  => '" />',
+                'sample' => 'ISSUE_ID'
+            ),
+            'Multiple Issue' => array(
+                'open'   => '<redissue project="PROJECT_ID" tracker="',
+                'close'  => '" />',
+                'sample' => 'TRACKER_ID'
+            ),
+        );
+
+        $redissue = array (
+            'type' => 'picker',
             'title' => $this->getLang('redissue.button'),
             'icon' => '../../plugins/redissue/images/redmine.png',
-            'open' => ' <redissue id="#',
-            'close' => '" />',
-            'sample' => 'ISSUE_NB',
+            'list' => array(),
         );
+
+        foreach ($syntax as $syntax_name => $syntax_data) {
+            $redissue['list'] [] = array(
+                'type' => 'format',
+                'title' => $syntax_name,
+                'icon' => '../../plugins/redissue/images/redmine.png',
+                'open' => $syntax_data['open'],
+                'close' => $syntax_data['close'],
+                'sample' => $syntax_data['sample'],
+            );
+        }
+
+        $event->data[] = $redissue;
     } // insert_button
 }
