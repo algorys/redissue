@@ -49,16 +49,14 @@ Some advanced settings are also available below.
 
 ## Syntax
 
-### Common options
-
-Single issue syntax:
+### Single issue syntax:
 
 `<redissue id="#number_issue" text="text_if_no_rights_or_API" /> `
 
 * id: id of the wanted issue.
 * text: displays a text other than the default if the user does not have the rights or the issue does not exist
 
-Multiple issue synax
+### Multiple issue synax
 
 If you want to get all issues of a specific project and/or a specific tracker, it's also possible. You've **2** other options:
 
@@ -69,7 +67,7 @@ In this case, the twice parameter **must be set** but one can be empty. E.g: if 
 
 * limit: set the limit of issues displayed. Default is 25.
 
-Examples:
+**Examples:**
 
 ```php
 // Display the first 25 issues with tracker 1 for project "myproject"
@@ -80,7 +78,22 @@ Examples:
 <redissue project="" tracker="4" limit="50" />
 ```
 
-### Other options:
+You can also sort the issues according to your interests.
+
+* sort: choose how issues will be displayed. by default they are displayed by **id** number, from the most recent to the oldest (descending).
+
+You can choose to sort by : id, subject, project, tracker, ...
+
+**Examples:**
+
+```php
+// Sort issue by ascending "id", for project "myproject" and tracker "1"
+<redissue project="myproject" tracker="1" sort="id" />
+// Sort issue by "subject" for project "myproject" and all trackers
+<redissue project="myproject" tracker="" sort="subject"/>
+```
+
+### Manage Multiple Servers
 
 * server: In case you have multiple server, you can override the server url and the API key defined in the Redissue **settings**. You must define these in a json file called `server.json` (already available in plugin folder). This file must be at root of redissue folder.
 
@@ -102,6 +115,8 @@ Example of _server.json_ file:
 Then simply add your server with: `server="first"` in redissue syntax.
 
 **Note:** If server url or key in json file is wrong or if you put a wrong name in "server" parameter(e.g: call _flirt_ instead _first_), redissue take the one who is set in dokuwiki settings. If **url** or **api_token** are wrong everywhere, an error message will be displayed instead of redissue.
+
+### Other options
 
 * title: you can override issue title if it's too long or for other reasons with: `title="my new title"`.
 * short: (**dokuwiki theme only**, bootstrap not needed this functionnality). If you've dokuwiki theme, you can hide additional information with short: `short="1"`.
