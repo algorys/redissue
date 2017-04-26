@@ -21,8 +21,8 @@ class DokuwikiRedmine {
     }
 
     function getProjectIdentifier($project_name) {
-            $project_id = $this->client->api('project')->getIdByName($project_name);
-            $project = $this->client->api('project')->show($project_id);
+            $project_id = $this->client->project->getIdByName($project_name);
+            $project = $this->client->project->show($project_id);
             return $project['project']['identifier'];
     }
 
@@ -58,7 +58,7 @@ class DokuwikiRedmine {
     }
 
     function getPriorityColor($id_priority) {
-        $all_prio = $this->client->api('issue_priority')->all();
+        $all_prio = $this->client->issue_priority->all();
         $normal_prio = 0;
         // Get the normal index and current index
         for ($i = 0; $i < count($all_prio['issue_priorities']); $i++) {
