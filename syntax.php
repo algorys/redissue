@@ -9,6 +9,8 @@ if (!defined('DOKU_INC')) die();
 require 'redmine/redmine.php';
 
 class syntax_plugin_redissue extends DokuWiki_Syntax_Plugin {
+    public $isBootstrap = False;
+
     public function getType() {
         return 'substition';
     }
@@ -148,6 +150,7 @@ class syntax_plugin_redissue extends DokuWiki_Syntax_Plugin {
     }
 
     function renderRedissue($renderer, $data) {
+        $this->detectBootstrap();
         $redmine = new DokuwikiRedmine();
         if(empty($data['server_token'])){
             $this->renderIssueLink($renderer, $data);
@@ -178,12 +181,15 @@ class syntax_plugin_redissue extends DokuWiki_Syntax_Plugin {
         }
     }
 
-    function isBootstrap() {
+    function detectBootstrap(){
         global $conf;
-        if ($conf['template'] == 'bootstrap3'){
-            return True;
-        } else {
-            return False;
+        $bootstrap_themes = $this->getConf('redissue.bootstrap-themes');
+        $bootstrap_exploded = explode(',', $bootstrap_themes);
+        foreach ($bootstrap_exploded as $key => $value) {
+            echo $conf['template'];
+            if (strcmp($conf['template'], $value) == 0){
+                $this->isBootstrap = True;
+            }
         }
     }
 
@@ -201,7 +207,7 @@ class syntax_plugin_redissue extends DokuWiki_Syntax_Plugin {
             $collapse = 'collapse';
         endif;
         // Render Link
-        if ($this->isBootstrap()){
+        if ($this->isBootstrap){
             $renderer->doc .= '<a title="'.$this->getLang('redissue.link.issue').'" href="' . $this->getIssueUrl($data['id'], $data) . '"><img src="' . $this->getImg() . '" class="redissue"/></a>';
             $renderer->doc .= '<a class="btn btn-primary redissue" role="button" data-toggle="'.$collapse.'" href="#collapse-'.$data['id'].'" aria-expanded="false" aria-controls="collapse-'.$data['id'].'">';
             $renderer->doc .= $cur_title;
@@ -254,7 +260,7 @@ class syntax_plugin_redissue extends DokuWiki_Syntax_Plugin {
             $color_prio = $redmine->getPriorityColor($priority['id']);
             $dates_times = $redmine->getDatesTimesIssue($issue);
             if(!$isClosed){
-                if($this->isBootstrap()){
+                if($this->isBootstrap){
                     $renderer->doc .= ' <span class="label label-success">' . $status . '</span>';
                 }else{
                 $renderer->doc .= ' <span class="badge-prio color-'.$color_prio.'">'.$priority['name'].'</span>';
@@ -262,14 +268,14 @@ class syntax_plugin_redissue extends DokuWiki_Syntax_Plugin {
                     $renderer->doc .= ' <span class="badge-prio open">' . $status . '</span>';
                 }
             } else {
-                if($this->isBootstrap()){
+                if($this->isBootstrap){
                     $renderer->doc .= ' <span class="label label-default">' . $status . '</span>';
                 }else{
                     $renderer->doc .= ' <span class="badge-prio closed">' . $status . '</span>';
                 }
             }
             
-            if($this->isBootstrap()) {
+            if($this->isBootstrap) {
                 $renderer->doc .= ' <span class="label label-'.$color_prio.'">'.$priority['name'].'</span>';
                 $renderer->doc .= ' <span class="label label-primary">'. $tracker['name'].'</span>';
                 $renderer->doc .= '<div class="well">';
