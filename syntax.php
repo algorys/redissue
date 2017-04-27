@@ -323,9 +323,10 @@ class syntax_plugin_redissue extends DokuWiki_Syntax_Plugin {
                 $renderer->doc .= '<b>'.$this->getLang('redissue.desc').' :</b>';
                 $renderer->doc .= '<p>'.$description.'</p>';
                 $renderer->doc .= '</div>';
-                $renderer->doc .= '<div class="progress">';
-                $renderer->doc .= '<span class="doku">'.$done_ratio.'% Complete</span>';
-                $renderer->doc .= '</div>'; // ./progress
+                //$renderer->doc .= '<div class="progress">';
+                $renderer->doc .= $done_ratio.'% Complete ';
+                $renderer->doc .= '<progress max="100" value="'.$done_ratio.'"></progress>';
+                //$renderer->doc .= '</div>'; // ./progress
                 $renderer->doc .= '</div>';
             }
             $renderer->doc .= '</p>';

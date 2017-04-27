@@ -119,4 +119,17 @@ div.issue-info span{
     font-weight: bold;
 }
 
+/* IE10 */
+progress {
+    color: #43ac6a;
+}
 
+/* Firefox */
+progress::-moz-progress-bar { 
+    background: #43ac6a;  
+}
+
+/* Chrome */
+progress::-webkit-progress-value {
+    background-color: #43ac6a;
+}
