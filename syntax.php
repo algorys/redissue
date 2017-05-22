@@ -186,7 +186,6 @@ class syntax_plugin_redissue extends DokuWiki_Syntax_Plugin {
         $bootstrap_themes = $this->getConf('redissue.bootstrap-themes');
         $bootstrap_exploded = explode(',', $bootstrap_themes);
         foreach ($bootstrap_exploded as $key => $value) {
-            echo $conf['template'];
             if (strcmp($conf['template'], $value) == 0){
                 $this->isBootstrap = True;
             }
